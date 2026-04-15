@@ -1,0 +1,22 @@
+{
+  "name": "jambox",
+  "version": "1.0.0",
+  "description": "JamBox Social Content Engine",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/pipeline/index.ts"
+  },
+  "dependencies": {
+    "@fal-ai/client": "^1.2.0",
+    "@google/generative-ai": "^0.21.0",
+    "@slack/web-api": "^7.0.2",
+    "@supabase/supabase-js": "^2.39.8",
+    "dotenv": "^16.4.5",
+    "googleapis": "^140.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  }
+}
