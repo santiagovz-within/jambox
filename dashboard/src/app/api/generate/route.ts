@@ -38,9 +38,13 @@ export async function POST(req: Request) {
       const channelId = isPlaceholder ? envChannelId : storedChannelId;
 
       if (!channelId) {
-        console.log(`[Generate] Skipping ${brand.brand_id} — no valid Slack channel configured.`);
+        const reason = `Skipped ${brand.brand_id}: stored="${storedChannelId}" env="${envChannelId ? 'SET' : 'MISSING'}" isPlaceholder=${isPlaceholder}`;
+        console.log(`[Generate] ${reason}`);
+        results.push(reason);
         continue;
       }
+      
+      console.log(`[Generate] Using channel ${channelId} for ${brand.brand_id}`);
 
       const prompt = `
 You are a social media strategist for ${brand.brand_name}.
