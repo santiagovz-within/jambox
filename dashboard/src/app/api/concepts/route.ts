@@ -17,12 +17,13 @@ export async function GET() {
     .from('concepts')
     .select(`
       *,
-      generated_images (url, variation_label)
+      generated_images (image_url, variation_label)
     `)
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(20);
 
   if (error) {
+    console.error('[concepts] Supabase error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
