@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@fal-ai/client": "^1.2.0",
+    "@fal-ai/serverless-client": "^0.7.0",
     "@google/generative-ai": "^0.21.0",
     "@slack/web-api": "^7.0.2",
     "@supabase/supabase-js": "^2.39.8",
