@@ -88,7 +88,7 @@ async function runBrandPipeline(brand: any) {
 }
 
 // Start the daily concurrent pipeline
-async function runConcurrentPipeline() {
+export async function runConcurrentPipeline() {
   console.log("🌟 Initializing JamBox Multi-Brand Engine...");
   
   const activeBrands = await getActiveBrands();
@@ -104,3 +104,4 @@ async function runConcurrentPipeline() {
 if (require.main === module) {
   runConcurrentPipeline();
 }
+

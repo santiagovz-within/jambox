@@ -1,30 +1,23 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import path from 'path';
+
+export const maxDuration = 60; // Tell Vercel this function can run up to 60 seconds
 
 export async function POST(req: Request) {
   try {
     const { brand_id } = await req.json();
-    
-    // Path to the JamBox root where package.json sits
-    const rootDir = path.join(process.cwd(), '..');
 
-    console.log(`[Generate API] Spawning pipeline at root: ${rootDir}`);
+    console.log(`[Generate API] Triggering pipeline for brand: ${brand_id || 'all'}`);
 
-    // Run the pipeline using npm start
-    exec(`npm start`, { cwd: rootDir }, (error, stdout, stderr) => {
-        if (error) {
-           console.error("❌ Background pipeline error:", error);
-           console.error("❌ Background pipeline stderr:", stderr);
-        }
-        console.log("✅ Pipeline stdout:", stdout);
-    });
+    // Dynamically import to avoid bundling issues; the pipeline does its own dotenv
+    const { runConcurrentPipeline } = await import('../../../../src/pipeline/index');
 
-    // We don't await the exec finish because it takes time and might hit Vercel function limits. 
-    // We return success immediately.
-    return NextResponse.json({ success: true, message: "Pipeline manually started." });
+    // Run pipeline inline — Vercel will keep the function alive for up to 60s
+    await runConcurrentPipeline();
+
+    return NextResponse.json({ success: true, message: "Pipeline completed." });
 
   } catch (e: any) {
+    console.error("[Generate API] Pipeline error:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
