@@ -40,32 +40,58 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
       });
   }, [activeBrandId]);
 
+  const [statusMsg, setStatusMsg] = useState("");
+
   const handleSave = async (runNow: boolean) => {
     setSaving(true);
-    await fetch('/api/brands', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({
-          brand_id: activeBrandId,
-          creative_variables: {
-             tone: tone,
-             push_topics: pushList
-          }
-       })
-    });
-    setSaving(false);
+    setStatusMsg("Saving variables...");
+    try {
+      const saveRes = await fetch('/api/brands', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+            brand_id: activeBrandId,
+            creative_variables: {
+               tone: tone,
+               push_topics: pushList
+            }
+         })
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) {
+        setStatusMsg(`❌ Save failed: ${saveData.error || 'Unknown error'}`);
+        setSaving(false);
+        return;
+      }
+      setStatusMsg("✅ Variables saved!");
+      setSaving(false);
 
-    if (runNow) {
-       setGenerating(true);
-       await fetch('/api/generate', { 
-           method: 'POST', 
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ brand_id: activeBrandId }) 
-       });
-       setGenerating(false);
+      if (runNow) {
+        setGenerating(true);
+        setStatusMsg("🚀 Generating concepts via Gemini... (this takes ~30s)");
+        const genRes = await fetch('/api/generate', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: activeBrandId }) 
+        });
+        const genData = await genRes.json();
+        setGenerating(false);
+        if (!genRes.ok) {
+          setStatusMsg(`❌ Generation failed: ${genData.error || 'Unknown error'}`);
+          return;
+        }
+        setStatusMsg(`✅ Done! ${JSON.stringify(genData.results || [])}`);
+        // Auto-close after 2 seconds so user can see the success message
+        setTimeout(() => onClose(), 2000);
+        return;
+      }
+
+      onClose();
+    } catch (err: any) {
+      setStatusMsg(`❌ Error: ${err.message}`);
+      setSaving(false);
+      setGenerating(false);
     }
-
-    onClose();
   };
 
   return (
@@ -142,9 +168,15 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
         </Box>
       </Box>
 
+      {statusMsg && (
+        <Alert severity={statusMsg.startsWith('❌') ? 'error' : statusMsg.startsWith('✅') ? 'success' : 'info'} sx={{ fontSize: '0.85rem', mb: 1 }}>
+          {statusMsg}
+        </Alert>
+      )}
+
       <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1.5, pb: 2 }}>
         <Button variant="contained" color="primary" onClick={() => handleSave(true)} disabled={saving || generating} fullWidth>
-           {generating ? "Triggering Pipeline..." : "Save & Generate Now"}
+           {generating ? "🚀 Generating..." : "Save & Generate Now"}
         </Button>
         <Button variant="outlined" color="primary" onClick={() => handleSave(false)} disabled={saving || generating} fullWidth>
            Save for Tomorrow
