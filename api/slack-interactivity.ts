@@ -1,6 +1,6 @@
 import { WebClient } from "@slack/web-api";
 import { createClient } from "@supabase/supabase-js";
-import * as fal from "@fal-ai/serverless-client";
+import { fal } from "@fal-ai/client";
 
 const getSupabase = () => createClient(
   process.env.SUPABASE_URL || '',
@@ -101,9 +101,9 @@ export default async function handler(req: any, res: any) {
     if (requireImageGeneration && imageGenPrompt) {
       Promise.resolve().then(async () => {
         try {
-          fal.config({ credentials: process.env.FAL_KEY });
-          const result = await fal.run("fal-ai/flux/schnell", {
-            input: { prompt: imageGenPrompt, num_images: 3 }
+          const result = await fal.subscribe("fal-ai/flux/schnell", {
+            input: { prompt: imageGenPrompt, num_images: 3 },
+            logs: false
           }) as any;
 
           const images = result?.images || [];
