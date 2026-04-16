@@ -149,3 +149,5 @@ Now you have to deploy the webhook folder separately so Slack can reach it.
 6. Go back to your Slack App Dashboard -> **Interactivity & Shortcuts** -> update the **Request URL** from your Ngrok link to your new Vercel link! *(e.g., `https://jambox-engine-webhooks.vercel.app/api/slack-interactivity`)*
 
 **You are done!** The dashboard is live, the webhooks listen 24/7, and GitHub Actions is permanently scheduled to run your database pipeline every single morning at 10 AM.
+
+### Test redeploy
