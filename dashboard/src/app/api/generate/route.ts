@@ -31,9 +31,14 @@ export async function POST(req: Request) {
 
     for (const brand of brands) {
       const vars = brand.creative_variables || {};
-      const channelId = brand.config?.channel_id || process.env.SLACK_CHANNEL_ID || '';
-      if (!channelId || channelId.startsWith('C_')) {
-        console.log(`[Generate] Skipping ${brand.brand_id} — no valid Slack channel.`);
+      const storedChannelId = brand.config?.channel_id || '';
+      const envChannelId = process.env.SLACK_CHANNEL_ID || '';
+      // Use real channel from env if stored value is a placeholder
+      const isPlaceholder = !storedChannelId || storedChannelId.startsWith('C_') || storedChannelId === 'C0123456789';
+      const channelId = isPlaceholder ? envChannelId : storedChannelId;
+
+      if (!channelId) {
+        console.log(`[Generate] Skipping ${brand.brand_id} — no valid Slack channel configured.`);
         continue;
       }
 
