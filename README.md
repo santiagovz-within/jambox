@@ -105,3 +105,47 @@ Right now, you can see the buttons in Slack, but clicking them gives an error. S
 **BOOM.** Go to Slack and click "APPROVE" on one of the concepts you generated earlier. Your terminal running `vercel dev` will receive the signal, trigger the Python/FAL.ai image generator, and post variations directly back as a thread reply! 
 
 *(Note: When you deploy this to production, you'll simply update that Slack Request URL to your live Vercel domain!)*
+
+---
+
+## Step 7: Push to GitHub & Deploy to Vercel (Production)
+To run this 24/7 without keeping your laptop open, we use a hybrid deployment architecture: GitHub natively handles the pipeline "cron" schedule, and Vercel hosts the web UI + Slack webhooks.
+
+### 1: Push your Code to GitHub
+1. Go to [GitHub.com](https://github.com/), log in, and click the **`+`** icon at the top right to create a **"New repository"**.
+2. Name it something like `jambox-engine`. Scroll down and click **Create repository**.
+3. *Leave the browser open.* Open the terminal on your Mac, make sure you are inside your `JamBox` folder, and run these three commands EXACTLY (replacing the `<YOUR_USERNAME>` part with the URL GitHub gives you):
+   ```bash
+   git remote add origin https://github.com/<YOUR_USERNAME>/jambox-engine.git
+   git branch -M main
+   git push -u origin main
+   ```
+4. Refresh the GitHub page. You should now see all your code files!
+
+### 2: Add Secrets to GitHub
+GitHub needs your API keys to run the daily morning generation engine.
+1. On your new GitHub repository page, click **Settings** (top right tab).
+2. On the left sidebar, scroll down to **Secrets and variables** -> **Actions**.
+3. Click the green **New repository secret** button.
+4. You need to add exactly 5 secrets. Open your local `.env` file, and create a GitHub Secret for each one (Name: `GEMINI_API_KEY`, Secret: `your_actual_key`). Do this for `GEMINI_API_KEY`, `FAL_KEY`, `SLACK_BOT_TOKEN`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY`.
+
+### 3: Deploy the Dashboard to Vercel
+1. Go to [Vercel.com](https://vercel.com) and log in with your GitHub account.
+2. Click **Add New** -> **Project**.
+3. Find your `jambox-engine` GitHub repository and click **Import**.
+4. In the "Configure Project" menu that pops up:
+   - Expand the **Root Directory** section.
+   - Click **Edit**, and select the **`dashboard`** folder. Click Save.
+   - Expand the **Environment Variables** tab and paste your `.env` keys here too so the Next.js UI can reach Supabase.
+   - Click **Deploy**. Wait for the confetti! Wait for it! 
+
+### 4: Deploy the Webhook to Vercel
+Now you have to deploy the webhook folder separately so Slack can reach it.
+1. Go back to your main Vercel dashboard. Click **Add New** -> **Project** again.
+2. Import the *exact same* `jambox-engine` GitHub repository.
+3. This time, **LEAVE THE ROOT DIRECTORY BLANK**. (Do NOT select `dashboard`).
+4. Click deploy. Vercel will safely deploy the `api/slack-interactivity.ts` file as a serverless function!
+5. Once complete, copy the domain Vercel gives you (e.g., `https://jambox-engine-webhooks.vercel.app`).
+6. Go back to your Slack App Dashboard -> **Interactivity & Shortcuts** -> update the **Request URL** from your Ngrok link to your new Vercel link! *(e.g., `https://jambox-engine-webhooks.vercel.app/api/slack-interactivity`)*
+
+**You are done!** The dashboard is live, the webhooks listen 24/7, and GitHub Actions is permanently scheduled to run your database pipeline every single morning at 10 AM.
