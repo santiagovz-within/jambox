@@ -66,18 +66,23 @@ Generate exactly 3 social media content concepts. Return a JSON array with this 
 Only return the JSON array, no other text.`;
 
       let concepts: any[] = [];
-      const models = ['gemini-2.5-flash-preview-04-17', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+
+      console.log(`[Generate] GEMINI_API_KEY set: ${!!process.env.GEMINI_API_KEY}`);
 
       for (const modelName of models) {
         try {
+          console.log(`[Generate] Trying model ${modelName} for ${brand.brand_id}...`);
           const model = genAI.getGenerativeModel({ model: modelName });
           const result = await model.generateContent(prompt);
-          const text = result.response.text().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          const raw = result.response.text();
+          console.log(`[Generate] Raw response from ${modelName} (first 200 chars): ${raw.slice(0, 200)}`);
+          const text = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           concepts = JSON.parse(text);
           console.log(`[Generate] Got ${concepts.length} concepts for ${brand.brand_id} via ${modelName}`);
           break;
-        } catch (e) {
-          console.warn(`[Generate] Model ${modelName} failed, trying next...`);
+        } catch (e: any) {
+          console.error(`[Generate] Model ${modelName} failed for ${brand.brand_id}: ${e.message}`);
         }
       }
 
