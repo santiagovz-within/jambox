@@ -82,7 +82,9 @@ Only return the JSON array, no other text.`;
       }
 
       if (concepts.length === 0) {
-        console.error(`[Generate] All models failed for ${brand.brand_id}`);
+        const msg = `All Gemini models failed for ${brand.brand_name} — check GEMINI_API_KEY and model availability`;
+        console.error(`[Generate] ${msg}`);
+        results.push(msg);
         continue;
       }
 
@@ -90,7 +92,7 @@ Only return the JSON array, no other text.`;
       const today = new Date().toISOString().split('T')[0];
       for (let i = 0; i < concepts.length; i++) {
         const concept = concepts[i];
-        const { data: saved } = await supabase.from('concepts').insert({
+        const { data: saved, error: insertError } = await supabase.from('concepts').insert({
           brand_id: brand.brand_id,
           date: today,
           concept_index: i + 1,
@@ -103,6 +105,12 @@ Only return the JSON array, no other text.`;
           rationale: concept.rationale,
           confidence_score: concept.confidence_score,
         }).select().single();
+
+        if (insertError) {
+          console.error(`[Generate] Supabase insert failed: ${insertError.message}`);
+          results.push(`DB save failed for ${brand.brand_id} concept ${i + 1}: ${insertError.message}`);
+          continue;
+        }
 
         const conceptId = saved?.id || 'unknown';
 

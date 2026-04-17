@@ -1,11 +1,52 @@
 import { WebClient } from "@slack/web-api";
 import { createClient } from "@supabase/supabase-js";
-import { fal } from "@fal-ai/client";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const getSupabase = () => createClient(
   process.env.SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
+
+async function generateAndUploadImage(
+  supabase: ReturnType<typeof getSupabase>,
+  prompt: string,
+  conceptId: string,
+  label: string
+): Promise<string | null> {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-image-preview' });
+
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseModalities: ['IMAGE'] } as any,
+  });
+
+  const imagePart = result.response.candidates?.[0]?.content?.parts?.find(
+    (p: any) => p.inlineData
+  ) as any;
+
+  if (!imagePart?.inlineData) return null;
+
+  const { data: base64, mimeType } = imagePart.inlineData;
+  const ext = mimeType?.includes('png') ? 'png' : 'jpg';
+  const fileName = `concepts/${conceptId}/${label}-${Date.now()}.${ext}`;
+  const imageBuffer = Buffer.from(base64, 'base64');
+
+  const { error: uploadError } = await supabase.storage
+    .from('concept-images')
+    .upload(fileName, imageBuffer, { contentType: mimeType || 'image/png' });
+
+  if (uploadError) {
+    console.error(`[Images] Upload failed for variation ${label}:`, uploadError.message);
+    return null;
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('concept-images')
+    .getPublicUrl(fileName);
+
+  return publicUrl;
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
@@ -97,22 +138,35 @@ export default async function handler(req: any, res: any) {
       blocks: newBlocks
     });
 
-    // Background image generation
+    // Background image generation using Gemini
     if (requireImageGeneration && imageGenPrompt) {
       Promise.resolve().then(async () => {
         try {
-          const result = await fal.subscribe("fal-ai/flux/schnell", {
-            input: { prompt: imageGenPrompt, num_images: 3 },
-            logs: false
-          }) as any;
+          const variations = ['A', 'B', 'C'];
+          const generatedImages: { url: string; label: string }[] = [];
 
-          const images = result?.images || [];
+          for (const label of variations) {
+            const url = await generateAndUploadImage(supabase, imageGenPrompt, conceptId, label).catch(e => {
+              console.error(`[Images] Variation ${label} failed:`, e.message);
+              return null;
+            });
+            if (url) generatedImages.push({ url, label });
+          }
 
-          if (conceptId && conceptId.length > 5 && images.length > 0) {
-            const imageRows = images.map((img: any, idx: number) => ({
+          if (generatedImages.length === 0) {
+            await slack.chat.postMessage({
+              channel: channelId,
+              thread_ts: messageTs,
+              text: "⚠️ Image generation failed — check GEMINI_API_KEY and the `concept-images` Supabase Storage bucket.",
+            });
+            return;
+          }
+
+          if (conceptId && conceptId.length > 5) {
+            const imageRows = generatedImages.map(img => ({
               concept_id: conceptId,
               image_url: img.url,
-              variation_label: ["A", "B", "C"][idx] || String(idx + 1),
+              variation_label: img.label,
               selected: false
             }));
             await supabase.from('generated_images').insert(imageRows);
@@ -122,11 +176,11 @@ export default async function handler(req: any, res: any) {
             { type: "section", text: { type: "mrkdwn", text: `*🖼️ Generated Images Ready!*` } }
           ];
 
-          images.forEach((img: any, idx: number) => {
+          generatedImages.forEach(img => {
             imageBlocks.push({
               type: "image",
               image_url: img.url,
-              alt_text: `Variation ${["A", "B", "C"][idx] || idx + 1}`
+              alt_text: `Variation ${img.label}`
             });
           });
 
@@ -136,8 +190,13 @@ export default async function handler(req: any, res: any) {
             text: "Generated images ready",
             blocks: imageBlocks
           });
-        } catch (err) {
-          console.error("Image generation failed:", err);
+        } catch (err: any) {
+          console.error("[Images] Generation pipeline failed:", err);
+          await slack.chat.postMessage({
+            channel: channelId,
+            thread_ts: messageTs,
+            text: `⚠️ Image generation error: ${err.message}`,
+          }).catch(() => {});
         }
       });
     }
