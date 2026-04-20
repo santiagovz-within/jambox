@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   AppBar, Toolbar, Typography, Container, Grid, Card, CardContent,
   CardMedia, CardActions, Chip, Drawer, Box, CssBaseline, Skeleton, Fade,
-  Menu, MenuItem, Button, Alert
+  Menu, MenuItem, Button, Alert, IconButton, Tooltip
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faSliders, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import {
+  faChevronDown, faSliders, faWandMagicSparkles,
+  faCheck, faXmark, faPenToSquare, faArrowUpRightFromSquare
+} from '@fortawesome/free-solid-svg-icons';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
 import VariablesPanel from '../components/VariablesPanel';
 
 const darkTheme = createTheme({
@@ -89,11 +93,19 @@ function todayLabel() {
   return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function statusColor(status: string): 'success' | 'error' | 'default' {
+  if (status === 'Approved') return 'success';
+  if (status === 'Rejected') return 'error';
+  return 'default';
+}
+
 export default function DashboardHome() {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [concepts, setConcepts] = useState<any[]>([]);
   const [fetchError, setFetchError] = useState('');
+  const [actionStates, setActionStates] = useState<Record<string, string>>({});
 
   const [brands, setBrands] = useState<{ brand_id: string; brand_name: string }[]>([]);
   const [activeBrand, setActiveBrand] = useState('fuzzys_taco_shop');
@@ -103,12 +115,10 @@ export default function DashboardHome() {
   const [monthAnchor, setMonthAnchor] = useState<null | HTMLElement>(null);
 
   const recentMonths = getRecentMonths();
-
   const activeBrandName = brands.find(b => b.brand_id === activeBrand)?.brand_name || activeBrand;
   const activeMonthLabel = recentMonths.find(m => m.value === activeMonth)?.label || activeMonth;
   const isCurrentMonth = activeMonth === currentMonth();
 
-  // Fetch brands once
   useEffect(() => {
     fetch('/api/brands')
       .then(r => r.json())
@@ -116,8 +126,7 @@ export default function DashboardHome() {
       .catch(() => {});
   }, []);
 
-  // Fetch concepts when brand or month changes
-  useEffect(() => {
+  const fetchConcepts = useCallback(() => {
     setLoading(true);
     setFetchError('');
     fetch(`/api/concepts?brand_id=${activeBrand}&month=${activeMonth}`)
@@ -135,6 +144,7 @@ export default function DashboardHome() {
             status: c.status === 'approved' ? 'Approved' : c.status === 'rejected' ? 'Rejected' : 'Pending',
             copy: c.copy || '',
             rationale: c.rationale || '',
+            sprout_data_notes: c.sprout_data_notes || '',
             confidence_score: c.confidence_score,
             images: c.generated_images?.map((img: any) => img.image_url).filter(Boolean) || [],
           })));
@@ -145,6 +155,27 @@ export default function DashboardHome() {
       .catch(err => setFetchError(err.message))
       .finally(() => setLoading(false));
   }, [activeBrand, activeMonth]);
+
+  useEffect(() => { fetchConcepts(); }, [fetchConcepts]);
+
+  const handleAction = async (conceptId: string, action: 'approve' | 'reject') => {
+    setActionStates(s => ({ ...s, [conceptId]: action }));
+    try {
+      const res = await fetch(`/api/concepts/${conceptId}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error('Action failed');
+      setConcepts(prev => prev.map(c =>
+        c.id === conceptId
+          ? { ...c, status: action === 'approve' ? 'Approved' : 'Rejected' }
+          : c
+      ));
+    } catch {
+      setActionStates(s => { const n = { ...s }; delete n[conceptId]; return n; });
+    }
+  };
 
   const pageTitle = isCurrentMonth
     ? `Today's Concepts — ${todayLabel()}`
@@ -170,18 +201,10 @@ export default function DashboardHome() {
                 Brand: {activeBrandName}
                 <FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.65em', marginLeft: 8, opacity: 0.7 }} />
               </Button>
-              <Menu
-                anchorEl={brandAnchor}
-                open={Boolean(brandAnchor)}
-                onClose={() => setBrandAnchor(null)}
-              >
+              <Menu anchorEl={brandAnchor} open={Boolean(brandAnchor)} onClose={() => setBrandAnchor(null)}>
                 {brands.map(b => (
-                  <MenuItem
-                    key={b.brand_id}
-                    selected={b.brand_id === activeBrand}
-                    onClick={() => { setActiveBrand(b.brand_id); setBrandAnchor(null); }}
-                    sx={{ borderRadius: 1 }}
-                  >
+                  <MenuItem key={b.brand_id} selected={b.brand_id === activeBrand}
+                    onClick={() => { setActiveBrand(b.brand_id); setBrandAnchor(null); }} sx={{ borderRadius: 1 }}>
                     {b.brand_name}
                   </MenuItem>
                 ))}
@@ -197,18 +220,10 @@ export default function DashboardHome() {
                 {activeMonthLabel}
                 <FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.65em', marginLeft: 8, opacity: 0.7 }} />
               </Button>
-              <Menu
-                anchorEl={monthAnchor}
-                open={Boolean(monthAnchor)}
-                onClose={() => setMonthAnchor(null)}
-              >
+              <Menu anchorEl={monthAnchor} open={Boolean(monthAnchor)} onClose={() => setMonthAnchor(null)}>
                 {recentMonths.map(m => (
-                  <MenuItem
-                    key={m.value}
-                    selected={m.value === activeMonth}
-                    onClick={() => { setActiveMonth(m.value); setMonthAnchor(null); }}
-                    sx={{ borderRadius: 1 }}
-                  >
+                  <MenuItem key={m.value} selected={m.value === activeMonth}
+                    onClick={() => { setActiveMonth(m.value); setMonthAnchor(null); }} sx={{ borderRadius: 1 }}>
                     {m.label}
                   </MenuItem>
                 ))}
@@ -246,15 +261,13 @@ export default function DashboardHome() {
                       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 0 }}>
                         <Skeleton variant="rectangular" height={200} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }} />
                         <CardContent sx={{ flexGrow: 1 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Skeleton variant="text" width={80} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }} />
-                            <Skeleton variant="rounded" width={60} height={24} sx={{ borderRadius: 12, bgcolor: 'rgba(255,255,255,0.05)' }} />
-                          </Box>
+                          <Skeleton variant="text" width={80} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }} />
                           <Skeleton variant="text" width="100%" height={40} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }} />
                           <Skeleton variant="text" width="60%" height={40} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }} />
                         </CardContent>
                         <CardActions sx={{ pb: 2, px: 2 }}>
-                          <Skeleton variant="rounded" width={100} height={28} sx={{ borderRadius: 12, bgcolor: 'rgba(255,255,255,0.05)' }} />
+                          <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 12, bgcolor: 'rgba(255,255,255,0.05)' }} />
+                          <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 12, bgcolor: 'rgba(255,255,255,0.05)' }} />
                         </CardActions>
                       </Card>
                     </Grid>
@@ -273,17 +286,18 @@ export default function DashboardHome() {
                 <Grid container spacing={4}>
                   {concepts.map((concept) => (
                     <Grid item xs={12} md={4} key={concept.id}>
-                      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         {concept.images.length > 0 && (
                           <CardMedia
                             component="img"
                             height="200"
                             image={concept.images[0]}
                             alt="Concept visual"
-                            sx={{ objectFit: 'cover' }}
+                            sx={{ objectFit: 'cover', cursor: 'pointer' }}
+                            onClick={() => router.push(`/concepts/${concept.id}`)}
                           />
                         )}
-                        <CardContent sx={{ flexGrow: 1 }}>
+                        <CardContent sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => router.push(`/concepts/${concept.id}`)}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                               <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
@@ -291,21 +305,13 @@ export default function DashboardHome() {
                               </Typography>
                               {concept.content_type && (
                                 <Typography variant="caption" color="text.disabled" sx={{ textTransform: 'capitalize' }}>
-                                  · {concept.content_type}
+                                  · {concept.content_type.replace('_', ' ')}
                                 </Typography>
                               )}
                             </Box>
-                            <Chip
-                              label={concept.status}
-                              size="small"
-                              color={
-                                concept.status === 'Approved' ? 'success' :
-                                concept.status === 'Rejected' ? 'error' :
-                                'default'
-                              }
-                            />
+                            <Chip label={concept.status} size="small" color={statusColor(concept.status)} />
                           </Box>
-                          <Typography variant="body1" sx={{ mb: 2 }}>
+                          <Typography variant="body1" sx={{ mb: 2, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             "{concept.copy}"
                           </Typography>
                           {concept.rationale && (
@@ -314,17 +320,60 @@ export default function DashboardHome() {
                             </Typography>
                           )}
                         </CardContent>
-                        <CardActions sx={{ pb: 2, px: 2, justifyContent: 'space-between' }}>
-                          <Box sx={{ backgroundColor: 'action.hover', border: '1px solid', borderColor: 'divider', borderRadius: 12, px: 1.5, py: 0.5 }}>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
+
+                        <CardActions sx={{ pb: 2, px: 2, justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            {/* YES */}
+                            <Button
+                              size="small"
+                              variant={concept.status === 'Approved' ? 'contained' : 'outlined'}
+                              color="success"
+                              onClick={() => handleAction(concept.id, 'approve')}
+                              disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
+                              sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
+                            >
+                              <FontAwesomeIcon icon={faCheck} style={{ marginRight: 4 }} /> YES
+                            </Button>
+
+                            {/* NO */}
+                            <Button
+                              size="small"
+                              variant={concept.status === 'Rejected' ? 'contained' : 'outlined'}
+                              color="error"
+                              onClick={() => handleAction(concept.id, 'reject')}
+                              disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
+                              sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
+                            >
+                              <FontAwesomeIcon icon={faXmark} style={{ marginRight: 4 }} /> NO
+                            </Button>
+
+                            {/* EDIT & APPROVE */}
+                            <Tooltip title="Edit & Approve">
+                              <IconButton
+                                size="small"
+                                onClick={() => router.push(`/concepts/${concept.id}`)}
+                                sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8 }}
+                              >
+                                <FontAwesomeIcon icon={faPenToSquare} style={{ fontSize: '0.85em' }} />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Typography variant="caption" color="text.secondary">
                               {new Date(concept.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </Typography>
+                            {concept.confidence_score && (
+                              <Typography variant="caption" color="text.disabled">
+                                {Math.round(concept.confidence_score * 100)}%
+                              </Typography>
+                            )}
+                            <Tooltip title="Open detail">
+                              <IconButton size="small" onClick={() => router.push(`/concepts/${concept.id}`)}>
+                                <FontAwesomeIcon icon={faArrowUpRightFromSquare} style={{ fontSize: '0.75em', opacity: 0.4 }} />
+                              </IconButton>
+                            </Tooltip>
                           </Box>
-                          {concept.confidence_score && (
-                            <Typography variant="caption" color="text.disabled">
-                              {Math.round(concept.confidence_score * 100)}% confidence
-                            </Typography>
-                          )}
                         </CardActions>
                       </Card>
                     </Grid>
@@ -346,7 +395,7 @@ export default function DashboardHome() {
             '& .MuiDrawer-paper': { width: 400, boxSizing: 'border-box', p: 2, mt: 8 },
           }}
         >
-          <VariablesPanel onClose={() => setDrawerOpen(false)} activeBrandId={activeBrand} />
+          <VariablesPanel onClose={() => { setDrawerOpen(false); fetchConcepts(); }} activeBrandId={activeBrand} />
         </Drawer>
       </Box>
     </ThemeProvider>
