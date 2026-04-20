@@ -451,7 +451,7 @@ function VariablesPageInner() {
                   No calendar context yet. Click "Regenerate" to auto-generate upcoming events and observances.
                 </Alert>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}>
                   {temporalContext.map((entry: any, i) => (
                     <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 1.5, bgcolor: entry.custom ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${entry.custom ? 'rgba(139,92,246,0.2)' : 'transparent'}` }}>
                       <Box sx={{ flex: 1 }}>
