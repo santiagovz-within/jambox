@@ -67,25 +67,43 @@ export async function POST(req: Request) {
   if (actionType === 'approve' || actionType === 'reject') {
     const dbStatus = actionType === 'reject' ? 'rejected' : 'approved';
 
-    const { error: updateErr } = await supabase
+    // Conditional update — only if still pending (first click wins)
+    const { data: updated, error: updateErr } = await supabase
       .from('concepts')
       .update({ status: dbStatus })
-      .eq('id', conceptId);
+      .eq('id', conceptId)
+      .eq('status', 'pending')
+      .select('id');
 
     if (updateErr) {
       console.error(`[Slack] DB update failed: ${updateErr.message}`);
     }
 
-    const { error: feedbackErr } = await supabase.from('feedback').insert({
+    if (!updated || updated.length === 0) {
+      // Already decided elsewhere — send ephemeral to the clicker
+      const { data: current } = await supabase.from('concepts').select('status').eq('id', conceptId).single();
+      const currentLabel = current?.status === 'approved' ? '✅ Approved' : current?.status === 'rejected' ? '❌ Rejected' : current?.status ?? 'decided';
+      if (responseUrl) {
+        await fetch(responseUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            response_type: 'ephemeral',
+            text: `This concept is already *${currentLabel}*. To change it, open the JamBox dashboard.`,
+          }),
+        });
+      }
+      return new NextResponse('', { status: 200 });
+    }
+
+    await supabase.from('feedback').insert({
       concept_id: conceptId,
       action: dbStatus,
       reviewer_slack_id: userId || 'slack',
       reviewer_name: userName,
+    }).then(({ error }) => {
+      if (error) console.warn(`[Slack] Feedback log failed: ${error.message}`);
     });
-
-    if (feedbackErr) {
-      console.warn(`[Slack] Feedback log failed: ${feedbackErr.message}`);
-    }
 
     if (responseUrl) {
       const statusLabel = dbStatus === 'approved' ? '✅ *Approved*' : '❌ *Rejected*';

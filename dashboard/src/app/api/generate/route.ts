@@ -183,7 +183,7 @@ Only return the JSON array, no other text.`;
 
         const today_label = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-        await slack.chat.postMessage({
+        const msgResult = await slack.chat.postMessage({
           channel: channelId,
           text: `New concept for ${brand.brand_name}`,
           blocks: [
@@ -203,6 +203,16 @@ Only return the JSON array, no other text.`;
             }
           ]
         });
+
+        // Save Slack message ref for cross-channel locking (requires migration 002)
+        if (conceptId !== 'unknown' && msgResult.ok && msgResult.channel && msgResult.ts) {
+          await supabase.from('concepts')
+            .update({ slack_channel_id: msgResult.channel, slack_message_ts: msgResult.ts })
+            .eq('id', conceptId)
+            .then(({ error }) => {
+              if (error) console.warn('[Generate] slack ref not saved — run migration 002:', error.message);
+            });
+        }
       }
 
       results.push(`${brand.brand_name}: ${concepts.length} concepts saved + posted to Slack`);

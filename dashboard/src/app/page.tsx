@@ -166,7 +166,18 @@ export default function DashboardHome() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
+
+      if (res.status === 409) {
+        // Already decided (e.g. via Slack) — sync from server
+        const data = await res.json();
+        const serverStatus = data.status === 'approved' ? 'Approved' : data.status === 'rejected' ? 'Rejected' : 'Pending';
+        setConcepts(prev => prev.map(c => c.id === conceptId ? { ...c, status: serverStatus } : c));
+        setActionStates(s => { const n = { ...s }; delete n[conceptId]; return n; });
+        return;
+      }
+
       if (!res.ok) throw new Error('Action failed');
+
       setConcepts(prev => prev.map(c =>
         c.id === conceptId
           ? { ...c, status: action === 'approve' ? 'Approved' : 'Rejected' }

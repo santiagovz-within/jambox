@@ -146,15 +146,34 @@ export default async function handler(req: any, res: any) {
   }
 
   if (conceptId) {
-    const { data: concept } = await supabase
+    // Conditional update — only if still pending (first click wins)
+    const { data: updated } = await supabase
       .from('concepts')
-      .select('image_gen_prompt, copy')
+      .update({ status: dbStatus })
       .eq('id', conceptId)
-      .single();
+      .eq('status', 'pending')
+      .select('id, image_gen_prompt, copy');
 
+    if (!updated || updated.length === 0) {
+      // Already decided — send ephemeral to the clicker
+      const { data: current } = await supabase.from('concepts').select('status').eq('id', conceptId).single();
+      const currentLabel = current?.status === 'approved' ? '✅ Approved' : current?.status === 'rejected' ? '❌ Rejected' : current?.status ?? 'decided';
+      if (responseUrl) {
+        await fetch(responseUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            response_type: 'ephemeral',
+            text: `This concept is already *${currentLabel}*. To change it, open the JamBox dashboard.`,
+          }),
+        });
+      }
+      return;
+    }
+
+    const concept = updated[0];
     imageGenPrompt = concept?.image_gen_prompt || (concept?.copy ? `Premium product photography: ${concept.copy}` : '');
 
-    await supabase.from('concepts').update({ status: dbStatus }).eq('id', conceptId);
     await supabase.from('feedback').insert({
       concept_id: conceptId,
       action: dbStatus,
