@@ -13,6 +13,7 @@ import {
   faCalendarDays, faChartLine, faSliders, faLocationDot, faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const darkTheme = createTheme({
   palette: {
@@ -31,7 +32,7 @@ const darkTheme = createTheme({
 
 const TONE_OPTIONS = ['playful', 'witty', 'bold', 'authentic', 'premium', 'rebellious'];
 
-export default function VariablesPage() {
+function VariablesPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeBrandId, setActiveBrandId] = useState(searchParams.get('brand') || 'fuzzys_taco_shop');
@@ -558,5 +559,17 @@ export default function VariablesPage() {
         </Container>
       </Box>
     </ThemeProvider>
+  );
+}
+
+export default function VariablesPage() {
+  return (
+    <Suspense fallback={
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#0A0A0A' }}>
+        <CircularProgress />
+      </Box>
+    }>
+      <VariablesPageInner />
+    </Suspense>
   );
 }
