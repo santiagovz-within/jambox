@@ -23,27 +23,39 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const updatePayload: Record<string, any> = { status: dbStatus };
   if (action === 'edit' && edited_copy) updatePayload.copy = edited_copy;
 
-  // Conditional update — only succeeds if concept is still pending (first click wins)
-  const { data: updated, error: updateErr } = await supabase
-    .from('concepts')
-    .update(updatePayload)
-    .eq('id', params.id)
-    .eq('status', 'pending')
-    .select('id, slack_channel_id, slack_message_ts');
+  let updated: any[] | null = null;
 
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
-
-  if (!updated || updated.length === 0) {
-    // Already decided — return current status so the UI can sync
-    const { data: current } = await supabase
+  if (action === 'edit') {
+    // Edit & Approve is always allowed — it's the explicit override path
+    const { data, error: updateErr } = await supabase
       .from('concepts')
-      .select('status')
+      .update(updatePayload)
       .eq('id', params.id)
-      .single();
-    return NextResponse.json(
-      { error: 'already_decided', status: current?.status ?? 'unknown' },
-      { status: 409 }
-    );
+      .select('id, slack_channel_id, slack_message_ts');
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    updated = data;
+  } else {
+    // YES / NO: conditional update — only if still pending (first click wins)
+    const { data, error: updateErr } = await supabase
+      .from('concepts')
+      .update(updatePayload)
+      .eq('id', params.id)
+      .eq('status', 'pending')
+      .select('id, slack_channel_id, slack_message_ts');
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+
+    if (!data || data.length === 0) {
+      const { data: current } = await supabase
+        .from('concepts')
+        .select('status')
+        .eq('id', params.id)
+        .single();
+      return NextResponse.json(
+        { error: 'already_decided', status: current?.status ?? 'unknown' },
+        { status: 409 }
+      );
+    }
+    updated = data;
   }
 
   // Log to feedback table

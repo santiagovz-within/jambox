@@ -21,8 +21,7 @@ export async function GET(req: Request) {
   let query = supabase
     .from('concepts')
     .select('*, generated_images(image_url, variation_label)')
-    .order('date', { ascending: false })
-    .order('concept_index', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (brand_id) {
     query = query.eq('brand_id', brand_id);

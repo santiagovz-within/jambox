@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Button, Chip, Alert, CircularProgress,
   Divider, TextField, Card, CardMedia, Grid, IconButton, Tooltip,
-  CssBaseline
+  CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft, faCheck, faXmark, faPenToSquare, faImage,
-  faVideo, faWandMagicSparkles, faSpinner, faChartBar
+  faVideo, faWandMagicSparkles, faSpinner, faChartBar, faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -79,6 +79,10 @@ export default function ConceptDetailPage() {
   const [videoGenError, setVideoGenError] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [selectedImageForVideo, setSelectedImageForVideo] = useState('');
+
+  // Delete
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/concepts/${id}`)
@@ -152,6 +156,20 @@ export default function ConceptDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/concepts/${id}`, { method: 'DELETE' });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Delete failed'); }
+      router.push('/');
+    } catch (e: any) {
+      setError(e.message);
+      setDeleteDialogOpen(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <ThemeProvider theme={darkTheme}>
@@ -219,7 +237,7 @@ export default function ConceptDetailPage() {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           {/* Action buttons */}
-          <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', alignItems: 'center' }}>
             <Button
               variant="contained"
               color="success"
@@ -244,10 +262,22 @@ export default function ConceptDetailPage() {
               variant="outlined"
               startIcon={<FontAwesomeIcon icon={faPenToSquare} />}
               onClick={() => setEditMode(!editMode)}
-              disabled={!isPending}
+              disabled={!!actionLoading}
               sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
             >
               Edit & Approve
+            </Button>
+
+            <Box sx={{ flexGrow: 1 }} />
+
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<FontAwesomeIcon icon={faTrash} />}
+              onClick={() => setDeleteDialogOpen(true)}
+              sx={{ borderRadius: 20, borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
+            >
+              Delete concept
             </Button>
           </Box>
 
@@ -357,7 +387,7 @@ export default function ConceptDetailPage() {
             <Button
               variant="contained"
               onClick={handleGenerateImages}
-              disabled={imageGenLoading}
+              disabled={imageGenLoading || concept?.status === 'rejected'}
               startIcon={imageGenLoading
                 ? <FontAwesomeIcon icon={faSpinner} spin />
                 : <FontAwesomeIcon icon={faWandMagicSparkles} />
@@ -455,6 +485,33 @@ export default function ConceptDetailPage() {
           )}
         </Container>
       </Box>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{ sx: { bgcolor: '#1e1e1e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 'bold' }}>Delete this concept?</DialogTitle>
+        <DialogContent>
+          <Typography color="text.secondary">
+            This will permanently delete the concept and all generated images. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ borderRadius: 20, color: 'text.secondary' }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+            sx={{ borderRadius: 20 }}
+          >
+            {deleteLoading ? 'Deleting…' : 'Yes, delete it'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }
