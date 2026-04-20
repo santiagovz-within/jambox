@@ -68,7 +68,9 @@ function VariablesPageInner() {
 
   // Trend signals
   const [trendSignals, setTrendSignals] = useState<any[]>([]);
-  const [customSignalInput, setCustomSignalInput] = useState('');
+  const [customNationalInput, setCustomNationalInput] = useState('');
+  const [customLocalInput, setCustomLocalInput] = useState('');
+  const [sproutConnected, setSproutConnected] = useState<boolean | null>(null);
 
   // Menu items
   const [menuItems, setMenuItems] = useState<string[]>([]);
@@ -111,6 +113,7 @@ function VariablesPageInner() {
       if (!ctxRes.error) {
         setTemporalContext(ctxRes.temporal_context || []);
         setTrendSignals(ctxRes.trend_signals || []);
+        if (typeof ctxRes.sprout_connected === 'boolean') setSproutConnected(ctxRes.sprout_connected);
       }
     } catch (e) {
       console.error('Failed to load brand:', e);
@@ -188,6 +191,7 @@ function VariablesPageInner() {
           brand_id: activeBrandId,
           brand_name: brand?.brand_name || activeBrandId,
           industry: brand?.config?.industry || 'general',
+          locations,
         }),
       });
       const data = await res.json();
@@ -214,10 +218,10 @@ function VariablesPageInner() {
     setCustomTemporalInput('');
   };
 
-  const addCustomSignal = () => {
-    if (!customSignalInput.trim()) return;
-    setTrendSignals([...trendSignals, { signal: customSignalInput.trim(), source: 'custom', strength: 'medium', custom: true }]);
-    setCustomSignalInput('');
+  const addCustomSignal = (input: string, setInput: (v: string) => void, scope: 'national' | 'local') => {
+    if (!input.trim()) return;
+    setTrendSignals([...trendSignals, { signal: input.trim(), source: 'custom', strength: 'medium', scope, custom: true }]);
+    setInput('');
   };
 
   if (loading) {
@@ -513,44 +517,86 @@ function VariablesPageInner() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Current trends, platform algorithm changes, and cultural signals. Auto-generated based on today's date. Add your own below.
+                Auto-generated based on today's date and brand locations. Add your own below.
               </Typography>
 
               {trendSignals.length === 0 ? (
                 <Alert severity="info" sx={{ mb: 2 }}>
                   No trend signals yet. Click "Regenerate" in the Calendar Context section above to generate both.
                 </Alert>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                  {trendSignals.map((signal: any, i) => (
-                    <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: signal.custom ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${signal.custom ? 'rgba(59,130,246,0.2)' : 'transparent'}` }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: signalColor[signal.strength] || '#94a3b8', flexShrink: 0 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2">{signal.signal}</Typography>
-                        <Typography variant="caption" color="text.disabled">{signal.source}</Typography>
-                      </Box>
-                      <Chip
-                        label={signal.strength}
-                        size="small"
-                        sx={{ fontSize: '0.65rem', bgcolor: `${signalColor[signal.strength]}22`, color: signalColor[signal.strength], border: `1px solid ${signalColor[signal.strength]}44` }}
-                      />
-                      <IconButton size="small" onClick={() => setTrendSignals(trendSignals.filter((_, j) => j !== i))}>
-                        <FontAwesomeIcon icon={faXmark} style={{ fontSize: '0.7em' }} />
+              ) : (() => {
+                const national = trendSignals.filter((s: any) => !s.scope || s.scope === 'national');
+                const local = trendSignals.filter((s: any) => s.scope === 'local');
+                const renderSignal = (signal: any, i: number, originalIdx: number) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.5, bgcolor: signal.custom ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${signal.custom ? 'rgba(59,130,246,0.2)' : 'transparent'}` }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: signalColor[signal.strength] || '#94a3b8', flexShrink: 0, mt: 0.7 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ lineHeight: 1.4 }}>{signal.signal}</Typography>
+                      <Typography variant="caption" color="text.disabled">{signal.source}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, flexShrink: 0 }}>
+                      <Chip label={signal.strength} size="small" sx={{ fontSize: '0.6rem', bgcolor: `${signalColor[signal.strength]}22`, color: signalColor[signal.strength], border: `1px solid ${signalColor[signal.strength]}44` }} />
+                      <IconButton size="small" onClick={() => setTrendSignals(trendSignals.filter((_, j) => j !== originalIdx))}>
+                        <FontAwesomeIcon icon={faXmark} style={{ fontSize: '0.65em' }} />
                       </IconButton>
                     </Box>
-                  ))}
-                </Box>
-              )}
+                  </Box>
+                );
+                return (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
+                    {/* National column */}
+                    <Box>
+                      <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 700, color: '#3B82F6', letterSpacing: 0.5 }}>
+                        🌎 National
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                        {national.length === 0
+                          ? <Typography variant="caption" color="text.disabled">No national signals.</Typography>
+                          : national.map((s: any, i: number) => renderSignal(s, i, trendSignals.indexOf(s)))}
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField size="small" placeholder="Add national trend"
+                          value={customNationalInput} onChange={e => setCustomNationalInput(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && addCustomSignal(customNationalInput, setCustomNationalInput, 'national')}
+                          sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
+                        <Button onClick={() => addCustomSignal(customNationalInput, setCustomNationalInput, 'national')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1 }}>
+                          <FontAwesomeIcon icon={faPlus} />
+                        </Button>
+                      </Box>
+                    </Box>
 
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField size="small" placeholder="Add custom trend signal"
-                  value={customSignalInput} onChange={e => setCustomSignalInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addCustomSignal()}
-                  sx={{ flexGrow: 1 }} />
-                <Button onClick={addCustomSignal} variant="outlined" size="small" sx={{ borderRadius: 8 }}>
-                  <FontAwesomeIcon icon={faPlus} />
-                </Button>
-              </Box>
+                    {/* Local column */}
+                    <Box>
+                      <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 700, color: '#22c55e', letterSpacing: 0.5 }}>
+                        📍 Local{locations.length > 0 ? ` — ${locations.slice(0, 2).join(', ')}${locations.length > 2 ? '…' : ''}` : ''}
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                        {local.length === 0
+                          ? <Typography variant="caption" color="text.disabled">{locations.length === 0 ? 'Add locations in the Locations section above, then Regenerate.' : 'No local signals yet — click Regenerate.'}</Typography>
+                          : local.map((s: any, i: number) => renderSignal(s, i, trendSignals.indexOf(s)))}
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField size="small" placeholder="Add local trend"
+                          value={customLocalInput} onChange={e => setCustomLocalInput(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && addCustomSignal(customLocalInput, setCustomLocalInput, 'local')}
+                          sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
+                        <Button onClick={() => addCustomSignal(customLocalInput, setCustomLocalInput, 'local')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1, borderColor: '#22c55e', color: '#22c55e' }}>
+                          <FontAwesomeIcon icon={faPlus} />
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })()}
+
+              {sproutConnected === false && (
+                <Alert severity="warning" sx={{ mt: 2 }} icon={false}>
+                  <Typography variant="body2" fontWeight={600}>Sprout Social not connected</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Trend data is mock. Add <code>SPROUT_API_TOKEN</code> and <code>SPROUT_PROFILE_ID_{activeBrandId.toUpperCase().replace(/-/g, '_')}</code> to your Vercel environment variables to enable live audience trends.
+                  </Typography>
+                </Alert>
+              )}
             </AccordionDetails>
           </Accordion>
 

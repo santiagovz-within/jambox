@@ -25,16 +25,24 @@ export async function GET(req: Request) {
     .single();
 
   const vars = brand?.creative_variables || {};
+
+  const envKey = `SPROUT_PROFILE_ID_${brand_id.toUpperCase().replace(/-/g, '_')}`;
+  const sproutConnected = !!(
+    process.env.SPROUT_API_TOKEN &&
+    (process.env[envKey] || process.env.SPROUT_PROFILE_ID)
+  );
+
   return NextResponse.json({
     temporal_context: vars.temporal_context || [],
     trend_signals: vars.trend_signals || [],
     last_updated: vars.context_last_updated || null,
+    sprout_connected: sproutConnected,
   });
 }
 
 // POST — auto-generate temporal context + trend signals using Gemini, then save to brand
 export async function POST(req: Request) {
-  const { brand_id, brand_name, industry } = await req.json();
+  const { brand_id, brand_name, industry, locations: locationsFromBody } = await req.json();
 
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: 'Missing DB credentials' }, { status: 500 });
@@ -46,8 +54,15 @@ export async function POST(req: Request) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+  // Resolve locations early so we can use them in the prompt
+  const locations: string[] = locationsFromBody || [];
+
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
+
+  const locationCtx = locations.length > 0
+    ? `Brand key markets: ${locations.join(', ')}`
+    : 'No specific locations configured — generate national trends only.';
 
   const prompt = `
 You are a cultural calendar and trend analyst for a social media agency.
@@ -55,6 +70,7 @@ You are a cultural calendar and trend analyst for a social media agency.
 TODAY: ${dateStr}
 BRAND: ${brand_name || brand_id}
 INDUSTRY: ${industry || 'general'}
+${locationCtx}
 
 Generate:
 
@@ -62,8 +78,11 @@ Generate:
 Cover: national days, cultural events (award shows, sports playoffs, album releases), retail calendar (payday, shopping windows), day-of-week patterns, weather/seasonal notes.
 Prioritize relevance to ${industry || 'this brand'}.
 
-2. TREND SIGNALS — 6-8 current trend signals this brand should factor in.
-Based on what's happening in social media right now as of ${dateStr}: platform algorithm changes, content format trends, cultural conversations, viral topics.
+2. TREND SIGNALS — 6-8 current trend signals this brand should factor in, split into two scopes:
+   - NATIONAL (3-4 signals): country-wide platform trends, algorithm changes, cultural conversations, viral topics as of ${dateStr}.
+   - LOCAL (2-4 signals): location-specific signals for ${locations.length > 0 ? locations.join(', ') : 'general markets'} — local weather/season patterns, regional events, city-specific cultural moments, local sports teams, geo-relevant consumer behaviors.
+
+Each trend signal must include a "scope" field: "national" or "local".
 
 Return ONLY valid JSON with this structure:
 {
@@ -79,12 +98,20 @@ Return ONLY valid JSON with this structure:
     {
       "signal": "Short-form vertical video engagement up 35% on Instagram",
       "source": "Platform analytics",
-      "strength": "high"
+      "strength": "high",
+      "scope": "national"
+    },
+    {
+      "signal": "Late spring heat wave in TX/CO drives demand for cold drinks and outdoor dining",
+      "source": "Weather/regional",
+      "strength": "medium",
+      "scope": "local"
     }
   ]
 }
 Types for temporal_context: "national_day", "cultural", "retail", "weather", "day_pattern"
 Strength for trend_signals: "high", "medium", "low"
+Scope for trend_signals: "national", "local"
 `;
 
   try {
