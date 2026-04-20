@@ -22,15 +22,24 @@ export async function POST(req: Request) {
   
   try {
     const body = await req.json();
-    const { brand_id, creative_variables } = body;
-    
-    // Merge new variables with existing ones
-    const { data: existing, error: fetchErr } = await supabase.from('brands').select('creative_variables').eq('brand_id', brand_id).single();
+    const { brand_id, creative_variables, config } = body;
+
+    const { data: existing, error: fetchErr } = await supabase
+      .from('brands')
+      .select('creative_variables, config')
+      .eq('brand_id', brand_id)
+      .single();
     if (fetchErr) throw fetchErr;
 
-    const newVars = { ...existing.creative_variables, ...creative_variables };
+    const updatePayload: Record<string, any> = {};
+    if (creative_variables) {
+      updatePayload.creative_variables = { ...existing.creative_variables, ...creative_variables };
+    }
+    if (config) {
+      updatePayload.config = { ...existing.config, ...config };
+    }
 
-    const { data, error } = await supabase.from('brands').update({ creative_variables: newVars }).eq('brand_id', brand_id).select();
+    const { data, error } = await supabase.from('brands').update(updatePayload).eq('brand_id', brand_id).select();
     if (error) throw error;
 
     return NextResponse.json({ success: true, brand: data[0] });

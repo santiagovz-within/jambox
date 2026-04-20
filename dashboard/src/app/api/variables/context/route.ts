@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { fetchCultureCalendar } from '@/lib/google-sheets';
 
 const getSupabase = () => {
   const url = process.env.SUPABASE_URL || '';
@@ -91,13 +92,23 @@ Strength for trend_signals: "high", "medium", "low"
     const raw = result.response.text().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const generated = JSON.parse(raw);
 
-    // Fetch existing custom entries to preserve them
-    const { data: brand } = await supabase.from('brands').select('creative_variables').eq('brand_id', brand_id).single();
+    // Fetch existing brand data to preserve custom entries and read Culture Calendar URL
+    const { data: brand } = await supabase
+      .from('brands')
+      .select('creative_variables, config')
+      .eq('brand_id', brand_id)
+      .single();
     const existingVars = brand?.creative_variables || {};
     const existingTemporal = (existingVars.temporal_context || []).filter((t: any) => t.custom);
     const existingSignals = (existingVars.trend_signals || []).filter((t: any) => t.custom);
 
-    const newTemporal = [...generated.temporal_context, ...existingTemporal];
+    // Pull from Culture Calendar Google Sheet if configured
+    const cultureCalendarUrl = brand?.config?.culture_calendar_url || '';
+    const sheetEntries = cultureCalendarUrl ? await fetchCultureCalendar(cultureCalendarUrl) : [];
+    console.log(`[Context] Culture Calendar: ${sheetEntries.length} entries from sheet`);
+
+    // Merge: sheet entries first (most authoritative), then Gemini-generated, then custom
+    const newTemporal = [...sheetEntries, ...generated.temporal_context, ...existingTemporal];
     const newSignals = [...generated.trend_signals, ...existingSignals];
 
     const newVars = {

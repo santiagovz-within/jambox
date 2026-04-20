@@ -20,6 +20,7 @@
     "@mui/material": "^5.15.14",
     "@slack/web-api": "^7.0.2",
     "@supabase/supabase-js": "^2.39.8",
+    "googleapis": "^171.4.0",
     "next": "14.1.4",
     "react": "^18",
     "react-dom": "^18"

@@ -10,7 +10,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft, faWandMagicSparkles, faPlus, faXmark, faRotate,
-  faCalendarDays, faChartLine, faSliders, faLocationDot, faChevronDown
+  faCalendarDays, faChartLine, faSliders, faLocationDot, faChevronDown,
+  faUtensils, faLink
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -69,6 +70,14 @@ function VariablesPageInner() {
   const [trendSignals, setTrendSignals] = useState<any[]>([]);
   const [customSignalInput, setCustomSignalInput] = useState('');
 
+  // Menu items
+  const [menuItems, setMenuItems] = useState<string[]>([]);
+  const [menuItemInput, setMenuItemInput] = useState('');
+
+  // Brand resource links (saved to config, not creative_variables)
+  const [cultureCalendarUrl, setCultureCalendarUrl] = useState('');
+  const [pdpFolderUrl, setPdpFolderUrl] = useState('');
+
   // Load brand data
   const loadBrand = useCallback(async (brandId: string) => {
     setLoading(true);
@@ -91,6 +100,11 @@ function VariablesPageInner() {
           setVisualStyle(v.visual_style || '');
           setPublicTopics(v.public_topic_alignment || []);
           setLocations(v.locations || []);
+          setMenuItems(v.menu_items || []);
+        }
+        if (brand?.config) {
+          setCultureCalendarUrl(brand.config.culture_calendar_url || '');
+          setPdpFolderUrl(brand.config.pdp_folder_url || '');
         }
       }
 
@@ -129,7 +143,12 @@ function VariablesPageInner() {
             locations,
             temporal_context: temporalContext,
             trend_signals: trendSignals,
-          }
+            menu_items: menuItems,
+          },
+          config: {
+            culture_calendar_url: cultureCalendarUrl,
+            pdp_folder_url: pdpFolderUrl,
+          },
         })
       });
       const data = await res.json();
@@ -455,9 +474,10 @@ function VariablesPageInner() {
                   {temporalContext.map((entry: any, i) => (
                     <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 1.5, bgcolor: entry.custom ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${entry.custom ? 'rgba(139,92,246,0.2)' : 'transparent'}` }}>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" fontWeight={entry.custom ? 600 : 400}>
+                        <Typography variant="body2" fontWeight={entry.custom || entry.source === 'culture_calendar' ? 600 : 400}>
                           {entry.label}
-                          {entry.custom && <Chip label="custom" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }} />}
+                          {entry.source === 'culture_calendar' && <Chip label="📅 Culture Calendar" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }} />}
+                          {entry.custom && <Chip label="custom" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(255,255,255,0.1)', color: 'text.secondary' }} />}
                         </Typography>
                         {entry.date && <Typography variant="caption" color="text.disabled">{entry.date}</Typography>}
                         {entry.relevance && <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>{entry.relevance}</Typography>}
@@ -530,6 +550,102 @@ function VariablesPageInner() {
                 <Button onClick={addCustomSignal} variant="outlined" size="small" sx={{ borderRadius: 8 }}>
                   <FontAwesomeIcon icon={faPlus} />
                 </Button>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Section: Menu Items */}
+          <Accordion sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <FontAwesomeIcon icon={faUtensils} style={{ color: '#f97316' }} />
+                <Typography fontWeight="bold">Menu Items / Products</Typography>
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Scope generations to specific products</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Add the products or menu items this brand sells. Concepts will be generated around these items, and the image generator will match the copy to the right PDP from your Drive folder.
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {menuItems.map(item => (
+                  <Chip
+                    key={item}
+                    label={item}
+                    onDelete={() => setMenuItems(menuItems.filter(x => x !== item))}
+                    size="small"
+                    sx={{ bgcolor: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316' }}
+                  />
+                ))}
+                {menuItems.length === 0 && (
+                  <Typography variant="caption" color="text.disabled">No products added yet.</Typography>
+                )}
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  size="small"
+                  placeholder="e.g. Honey Chipotle Shrimp Taco, Old Skool Black"
+                  value={menuItemInput}
+                  onChange={e => setMenuItemInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
+                  sx={{ flexGrow: 1 }}
+                />
+                <Button
+                  onClick={() => addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
+                  variant="outlined" size="small"
+                  sx={{ borderRadius: 8, borderColor: '#f97316', color: '#f97316' }}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Section: Brand Resource Links */}
+          <Accordion sx={{ mb: 4 }}>
+            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <FontAwesomeIcon icon={faLink} style={{ color: '#94a3b8' }} />
+                <Typography fontWeight="bold">Brand Resource Links</Typography>
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Google Sheets & Drive integrations</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+                    Culture Calendar — Google Sheets URL
+                  </Typography>
+                  <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>
+                    The sheet is read on every "Regenerate" — entries appear in Temporal / Calendar Context above.
+                    Expected columns: Date | Event/Label | Relevance | Type
+                  </Typography>
+                  <TextField
+                    fullWidth size="small"
+                    placeholder="https://docs.google.com/spreadsheets/d/…"
+                    value={cultureCalendarUrl}
+                    onChange={e => setCultureCalendarUrl(e.target.value)}
+                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+                    PDP Images — Google Drive Folder URL
+                  </Typography>
+                  <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>
+                    Folder containing product images. Files must follow the naming convention:{' '}
+                    <code style={{ color: '#f97316' }}>{'{brand}_{category}_{product-name}.{ext}'}</code>
+                    <br />
+                    e.g. <code style={{ color: '#94a3b8' }}>fuzzys_taco_honey-chipotle-shrimp.jpg</code>
+                  </Typography>
+                  <TextField
+                    fullWidth size="small"
+                    placeholder="https://drive.google.com/drive/folders/…"
+                    value={pdpFolderUrl}
+                    onChange={e => setPdpFolderUrl(e.target.value)}
+                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }}
+                  />
+                </Box>
               </Box>
             </AccordionDetails>
           </Accordion>

@@ -64,6 +64,11 @@ export async function POST(req: Request) {
       const sprout = await fetchSproutData(brand.brand_id, brand.config);
       console.log(`[Generate] Sprout data: connected=${sprout.sprout_connected}, trends=${sprout.trends.length}, posts=${sprout.top_performing_posts.length}`);
 
+      const menuItems = (vars.menu_items || []) as string[];
+      const menuCtx = menuItems.length > 0
+        ? menuItems.join(', ')
+        : 'No specific items configured — use brand discretion.';
+
       const temporalCtx = (vars.temporal_context || []).map((t: any) => `- ${t.label}${t.date ? ` (${t.date})` : ''}`).join('\n') || 'None configured.';
       const trendSignals = (vars.trend_signals || []).map((t: any) => `- [${(t.strength || 'medium').toUpperCase()}] ${t.signal} (${t.source})`).join('\n') || 'None configured.';
 
@@ -81,6 +86,7 @@ BRAND CREATIVE DIRECTION:
 - Trend weight: ${vars.trend_weight ?? 0.6} (0=evergreen, 1=trendy)
 - Locations: ${(vars.locations || []).join(', ') || 'General'}
 - Public topic alignment: ${(vars.public_topic_alignment || []).join(', ') || 'None'}
+- Menu items / products to feature: ${menuCtx}
 
 UPCOMING TEMPORAL CONTEXT:
 ${temporalCtx}
