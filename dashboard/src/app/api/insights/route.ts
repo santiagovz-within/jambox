@@ -37,7 +37,7 @@ export async function GET(req: Request) {
 
   try {
      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { temperature: 0.2 } });
+     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite", generationConfig: { temperature: 0.2 } });
 
      const prompt = `
      SYSTEM: You are a senior social media analyst.
