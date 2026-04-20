@@ -103,7 +103,7 @@ Return a JSON array with this exact structure:
 Only return the JSON array, no other text.`;
 
       let concepts: any[] = [];
-      const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+      const models = ['gemini-1.5-flash', 'gemini-1.5-pro'];
 
       console.log(`[Generate] GEMINI_API_KEY set: ${!!process.env.GEMINI_API_KEY}`);
 

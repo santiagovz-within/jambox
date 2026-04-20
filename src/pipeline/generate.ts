@@ -97,7 +97,7 @@ TASK: Generate exactly 3 social post concepts. The mix MUST include:
 For sprout_data_notes: Reference specific data points from the Sprout Social data above (engagement rates, audience insights, trend signals). If Sprout data is mock, still write realistic-sounding data backing notes grounded in the concept's platform and content type best practices.
 `;
 
-  const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash"];
+  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro"];
   let result: any = null;
   let lastError: any = null;
 

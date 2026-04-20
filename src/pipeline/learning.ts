@@ -14,7 +14,7 @@ export async function generateLearningInsights(
       return "Over the past 2 weeks, your team has approved 85% of humor-driven concepts. Suggestion: increase trend_weight.";
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: { temperature: 0.2 } });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { temperature: 0.2 } });
 
   const prompt = `
 SYSTEM: You are a senior social media analyst.
