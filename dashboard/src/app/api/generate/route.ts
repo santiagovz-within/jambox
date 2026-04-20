@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { WebClient } from '@slack/web-api';
+import { fetchSproutData } from '@/lib/sprout';
 
 export const maxDuration = 60;
 
@@ -59,6 +60,10 @@ export async function POST(req: Request) {
 
       console.log(`[Generate] Using channel ${channelId} for ${brand.brand_id}`);
 
+      // Fetch live Sprout Social data for this brand
+      const sprout = await fetchSproutData(brand.brand_id, brand.config);
+      console.log(`[Generate] Sprout data: connected=${sprout.sprout_connected}, trends=${sprout.trends.length}, posts=${sprout.top_performing_posts.length}`);
+
       const temporalCtx = (vars.temporal_context || []).map((t: any) => `- ${t.label}${t.date ? ` (${t.date})` : ''}`).join('\n') || 'None configured.';
       const trendSignals = (vars.trend_signals || []).map((t: any) => `- [${(t.strength || 'medium').toUpperCase()}] ${t.signal} (${t.source})`).join('\n') || 'None configured.';
 
@@ -82,6 +87,13 @@ ${temporalCtx}
 
 TREND SIGNALS:
 ${trendSignals}
+
+SPROUT SOCIAL DATA (${sprout.sprout_connected ? '✅ LIVE' : '⚠️ mock — set SPROUT_API_TOKEN + SPROUT_PROFILE_ID_${brand.brand_id.toUpperCase()} in Vercel env vars'}):
+Audience trends: ${JSON.stringify(sprout.trends, null, 2)}
+Top performing posts (last 30 days): ${JSON.stringify(sprout.top_performing_posts, null, 2)}
+Audience snapshot: ${JSON.stringify(sprout.audience_snapshot, null, 2)}
+
+For sprout_data_notes: Reference specific data points from the Sprout Social data above. ${sprout.sprout_connected ? 'This is LIVE data — cite the actual engagement rates and audience behaviors shown.' : 'Data is mock — write realistic backing notes grounded in platform best practices for this content type.'}
 
 Generate exactly 3 social media content concepts. The mix MUST include:
 1. One Instagram Reel (platform: "instagram", content_type: "reel")
