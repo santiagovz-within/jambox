@@ -12,7 +12,7 @@ const getSupabase = () => createClient(
 
 interface PDPRef { buffer: Buffer; mimeType: string; filename: string }
 
-const IMAGE_MODELS = ['gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview'];
+const IMAGE_MODELS = ['gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'];
 
 async function generateAndUpload(
   supabase: ReturnType<typeof getSupabase>,
