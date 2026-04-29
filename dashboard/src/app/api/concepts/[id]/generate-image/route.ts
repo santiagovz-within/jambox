@@ -19,7 +19,7 @@ async function generateAndUpload(
   prompt: string,
   conceptId: string,
   pdp?: PDPRef
-): Promise<string | null> {
+): Promise<string> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
   const parts: any[] = [];
@@ -31,22 +31,34 @@ async function generateAndUpload(
   }
 
   let imagePart: any = null;
+  const modelErrors: string[] = [];
+
   for (const modelName of IMAGE_MODELS) {
     try {
       console.log(`[ImageGen] Trying model ${modelName}...`);
       const model = genAI.getGenerativeModel({ model: modelName });
       const result = await model.generateContent({
         contents: [{ role: 'user', parts }],
-        generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } as any,
+        generationConfig: { responseModalities: ['IMAGE'] } as any,
       });
-      imagePart = result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-      if (imagePart) { console.log(`[ImageGen] Success with ${modelName}`); break; }
+
+      const allParts = result.response.candidates?.[0]?.content?.parts || [];
+      console.log(`[ImageGen] ${modelName} returned ${allParts.length} part(s):`,
+        allParts.map((p: any) => p.inlineData ? `image(${p.inlineData.mimeType})` : `text(${(p.text || '').slice(0, 60)})`).join(' | ')
+      );
+
+      imagePart = allParts.find((p: any) => p.inlineData);
+      if (imagePart) { console.log(`[ImageGen] Got image from ${modelName}`); break; }
+      modelErrors.push(`${modelName}: responded but returned no image part`);
     } catch (e: any) {
       console.warn(`[ImageGen] Model ${modelName} failed: ${e.message}`);
+      modelErrors.push(`${modelName}: ${e.message}`);
     }
   }
 
-  if (!imagePart?.inlineData) return null;
+  if (!imagePart?.inlineData) {
+    throw new Error(`No image returned. Model attempts: ${modelErrors.join(' | ')}`);
+  }
 
   const { data: base64, mimeType } = imagePart.inlineData;
   const ext = mimeType?.includes('png') ? 'png' : 'jpg';
@@ -58,8 +70,7 @@ async function generateAndUpload(
     .upload(fileName, imageBuffer, { contentType: mimeType || 'image/jpeg' });
 
   if (uploadError) {
-    console.error('[ImageGen] Upload failed:', uploadError.message);
-    return null;
+    throw new Error(`Supabase upload failed: ${uploadError.message}`);
   }
 
   const { data: { publicUrl } } = supabase.storage.from('concept-images').getPublicUrl(fileName);
@@ -132,10 +143,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const prompt = concept.image_gen_prompt || `Premium product photography for social media: ${concept.copy}`;
     const imageUrl = await generateAndUpload(supabase, prompt, params.id, pdpRef);
-
-    if (!imageUrl) {
-      return NextResponse.json({ error: 'Image generation failed — check GEMINI_API_KEY and concept-images Supabase bucket' }, { status: 500 });
-    }
 
     await supabase.from('generated_images').insert({
       concept_id: params.id,
