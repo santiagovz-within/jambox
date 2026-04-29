@@ -6,7 +6,7 @@ import {
   CardMedia, CardActions, Chip, Drawer, Box, CssBaseline, Skeleton, Fade,
   Menu, MenuItem, Button, Alert, IconButton, Tooltip, ToggleButtonGroup, ToggleButton
 } from '@mui/material';
-import { ChevronDown, Sliders, Zap, Check, X, Edit2, ExternalLink } from 'react-feather';
+import { ChevronDown, Sliders, Zap, Check, X, Edit, ExternalLink } from 'react-feather';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import VariablesPanel from '../components/VariablesPanel';
@@ -429,7 +429,7 @@ export default function DashboardHome() {
                                 onClick={() => router.push(`/concepts/${concept.id}`)}
                                 sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8 }}
                               >
-                                <Edit2 size={14} />
+                                <Edit size={14} />
                               </IconButton>
                             </Tooltip>
                           </Box>

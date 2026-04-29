@@ -7,7 +7,7 @@ import {
   FormControlLabel, FormLabel, Accordion, AccordionSummary, AccordionDetails, Tooltip
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link } from 'react-feather';
+import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link, Globe } from 'react-feather';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -252,7 +252,7 @@ function VariablesPageInner() {
               disabled={saving || generating || contextLoading}
               sx={{ borderRadius: 20 }}
             >
-              {generating ? '🚀 Generating…' : 'Save & Generate Now'}
+              {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
             <Button
               variant="outlined"
@@ -283,7 +283,7 @@ function VariablesPageInner() {
 
           {statusMsg && (
             <Alert severity={statusMsg.startsWith('❌') ? 'error' : statusMsg.startsWith('✅') ? 'success' : 'info'} sx={{ mb: 3 }} onClose={() => setStatusMsg('')}>
-              {statusMsg}
+              {statusMsg.replace(/^[✅❌🚀]\s*/, '')}
             </Alert>
           )}
 
@@ -475,7 +475,7 @@ function VariablesPageInner() {
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" fontWeight={entry.custom || entry.source === 'culture_calendar' ? 600 : 400}>
                           {entry.label}
-                          {entry.source === 'culture_calendar' && <Chip label="📅 Culture Calendar" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }} />}
+                          {entry.source === 'culture_calendar' && <Chip icon={<Calendar size={9} />} label="Culture Calendar" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', '& .MuiChip-icon': { color: '#8b5cf6' } }} />}
                           {entry.custom && <Chip label="custom" size="small" sx={{ ml: 1, fontSize: '0.6rem', bgcolor: 'rgba(255,255,255,0.1)', color: 'text.secondary' }} />}
                         </Typography>
                         {entry.date && <Typography variant="caption" color="text.disabled">{entry.date}</Typography>}
@@ -541,8 +541,8 @@ function VariablesPageInner() {
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                     {/* National column */}
                     <Box>
-                      <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 700, color: '#3B82F6', letterSpacing: 0.5 }}>
-                        🌎 National
+                      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: '#3B82F6', letterSpacing: 0.5 }}>
+                        <Globe size={12} /> National
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
                         {national.length === 0
@@ -562,8 +562,8 @@ function VariablesPageInner() {
 
                     {/* Local column */}
                     <Box>
-                      <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 700, color: '#22c55e', letterSpacing: 0.5 }}>
-                        📍 Local{locations.length > 0 ? ` — ${locations.slice(0, 2).join(', ')}${locations.length > 2 ? '…' : ''}` : ''}
+                      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: '#22c55e', letterSpacing: 0.5 }}>
+                        <MapPin size={12} /> Local{locations.length > 0 ? ` — ${locations.slice(0, 2).join(', ')}${locations.length > 2 ? '…' : ''}` : ''}
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
                         {local.length === 0
@@ -699,7 +699,7 @@ function VariablesPageInner() {
               disabled={saving || generating || contextLoading}
               sx={{ borderRadius: 20, flex: 1 }}
             >
-              {generating ? '🚀 Generating…' : 'Save & Generate Now'}
+              {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
             <Button
               variant="outlined"

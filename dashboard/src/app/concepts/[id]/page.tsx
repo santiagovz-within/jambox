@@ -8,7 +8,7 @@ import {
   Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft, Check, X, Edit2, Image as ImageIcon, Video, Zap, BarChart2, Trash2, Copy } from 'react-feather';
+import { ArrowLeft, Check, X, Edit2, Image as ImageIcon, Video, Zap, BarChart2, Trash2, Copy, FileText, Eye, Star, Lock } from 'react-feather';
 import { useRouter, useParams } from 'next/navigation';
 
 const darkTheme = createTheme({
@@ -341,8 +341,8 @@ export default function ConceptDetailPage() {
             <Grid item xs={12}>
               <Box sx={{ mb: 4 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0 }}>
-                  <Typography variant="overline" color="primary" sx={{ letterSpacing: 2, fontWeight: 700 }}>
-                    📝 COPY
+                  <Typography variant="overline" color="primary" sx={{ letterSpacing: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <FileText size={13} /> COPY
                   </Typography>
                   <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
                     <IconButton size="small" onClick={handleCopyCopy} sx={{ color: copied ? '#22c55e' : 'text.disabled' }}>
@@ -361,8 +361,8 @@ export default function ConceptDetailPage() {
               </Box>
 
               <Box sx={{ mb: 4 }}>
-                <Typography variant="overline" color="secondary" sx={{ letterSpacing: 2, fontWeight: 700 }}>
-                  🎨 VISUAL DIRECTION
+                <Typography variant="overline" color="secondary" sx={{ letterSpacing: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Eye size={13} /> VISUAL DIRECTION
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7 }}>
                   {concept?.visual_direction}
@@ -370,8 +370,8 @@ export default function ConceptDetailPage() {
               </Box>
 
               <Box sx={{ mb: 4 }}>
-                <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: '#f59e0b' }}>
-                  💡 WHY THIS WORKS
+                <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Star size={13} /> WHY THIS WORKS
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7 }}>
                   {concept?.rationale}
@@ -452,7 +452,7 @@ export default function ConceptDetailPage() {
                     color: 'text.disabled', fontSize: '0.8125rem',
                     bgcolor: 'rgba(255,255,255,0.03)', whiteSpace: 'nowrap',
                   }}>
-                    🔒 1K Resolution
+                    <Lock size={13} /> 1K Resolution
                   </Box>
                 </Box>
 
@@ -476,8 +476,8 @@ export default function ConceptDetailPage() {
                     style={{ width: '100%', display: 'block' }}
                   />
                 </Box>
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
-                  ✅ Image generated — one image per concept
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Check size={12} color="#22c55e" /> Image generated — one image per concept
                 </Typography>
               </Box>
             )}

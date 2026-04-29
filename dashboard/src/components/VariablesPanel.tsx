@@ -154,7 +154,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
 
           {statusMsg && (
             <Alert severity={statusMsg.startsWith('❌') ? 'error' : statusMsg.startsWith('✅') ? 'success' : 'info'} sx={{ fontSize: '0.85rem' }}>
-              {statusMsg}
+              {statusMsg.replace(/^[✅❌🚀]\s*/, '')}
             </Alert>
           )}
 
@@ -167,7 +167,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
               fullWidth
               sx={{ borderRadius: 20 }}
             >
-              {generating ? '🚀 Generating…' : 'Save & Generate Now'}
+              {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
             <Button
               variant="outlined"
