@@ -45,7 +45,7 @@ async function generateAndUploadImage(
   label: string
 ): Promise<string | null> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-image-preview' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
 
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],

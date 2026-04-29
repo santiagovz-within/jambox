@@ -12,6 +12,8 @@ const getSupabase = () => createClient(
 
 interface PDPRef { buffer: Buffer; mimeType: string; filename: string }
 
+const IMAGE_MODELS = ['gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview'];
+
 async function generateAndUpload(
   supabase: ReturnType<typeof getSupabase>,
   prompt: string,
@@ -19,7 +21,6 @@ async function generateAndUpload(
   pdp?: PDPRef
 ): Promise<string | null> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-preview-image-generation' });
 
   const parts: any[] = [];
   if (pdp) {
@@ -29,12 +30,22 @@ async function generateAndUpload(
     parts.push({ text: prompt });
   }
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts }],
-    generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } as any,
-  });
+  let imagePart: any = null;
+  for (const modelName of IMAGE_MODELS) {
+    try {
+      console.log(`[ImageGen] Trying model ${modelName}...`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts }],
+        generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } as any,
+      });
+      imagePart = result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
+      if (imagePart) { console.log(`[ImageGen] Success with ${modelName}`); break; }
+    } catch (e: any) {
+      console.warn(`[ImageGen] Model ${modelName} failed: ${e.message}`);
+    }
+  }
 
-  const imagePart = result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData) as any;
   if (!imagePart?.inlineData) return null;
 
   const { data: base64, mimeType } = imagePart.inlineData;
