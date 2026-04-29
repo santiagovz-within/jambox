@@ -91,7 +91,9 @@ export default function ConceptDetailPage() {
         if (d.error) { setError(d.error); return; }
         setConcept(d.concept);
         setEditedCopy(d.concept?.edited_copy || d.concept?.copy || '');
-        setGeneratedImages(d.concept?.generated_images || []);
+        const imgs = d.concept?.generated_images || [];
+        setGeneratedImages(imgs);
+        if (imgs.length > 0) setSelectedImageForVideo(imgs[0].image_url);
         setVideoUrl(d.concept?.generated_video_url || '');
       })
       .catch(e => setError(e.message))
@@ -126,9 +128,17 @@ export default function ConceptDetailPage() {
     setImageGenError('');
     try {
       const res = await fetch(`/api/concepts/${id}/generate-image`, { method: 'POST' });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any;
+      try { data = JSON.parse(text); } catch {
+        throw new Error(`Server error (non-JSON response). Check Vercel logs for details.`);
+      }
       if (!res.ok) throw new Error(data.error || 'Generation failed');
-      setGeneratedImages(data.images.map((img: any) => ({ image_url: img.url, variation_label: img.label })));
+      const imageUrl = data.image_url || data.images?.[0]?.url;
+      if (imageUrl) {
+        setGeneratedImages([{ image_url: imageUrl, variation_label: 'A' }]);
+        setSelectedImageForVideo(imageUrl);
+      }
     } catch (e: any) {
       setImageGenError(e.message);
     } finally {
@@ -375,7 +385,7 @@ export default function ConceptDetailPage() {
             {/* Suggested prompt */}
             <Box sx={{ mb: 3, p: 2, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)' }}>
               <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.5 }}>
-                Suggested prompt for generating
+                AI image prompt
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
                 {concept?.image_gen_prompt || 'No image generation prompt available.'}
@@ -384,52 +394,32 @@ export default function ConceptDetailPage() {
 
             {imageGenError && <Alert severity="error" sx={{ mb: 2 }}>{imageGenError}</Alert>}
 
-            <Button
-              variant="contained"
-              onClick={handleGenerateImages}
-              disabled={imageGenLoading || concept?.status === 'rejected'}
-              startIcon={imageGenLoading
-                ? <FontAwesomeIcon icon={faSpinner} spin />
-                : <FontAwesomeIcon icon={faWandMagicSparkles} />
-              }
-              sx={{ borderRadius: 20, mb: 3 }}
-            >
-              {imageGenLoading ? 'Generating images… (~30s)' : 'Generate with this prompt'}
-            </Button>
-
-            {generatedImages.length > 0 && (
-              <Grid container spacing={2}>
-                {generatedImages.map((img: any) => (
-                  <Grid item xs={12} sm={4} key={img.variation_label || img.id}>
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        borderRadius: 2,
-                        overflow: 'hidden',
-                        border: selectedImageForVideo === img.image_url
-                          ? '2px solid #3B82F6'
-                          : '2px solid transparent',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => setSelectedImageForVideo(img.image_url)}
-                    >
-                      <img
-                        src={img.image_url}
-                        alt={`Variation ${img.variation_label}`}
-                        style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }}
-                      />
-                      <Box sx={{ position: 'absolute', bottom: 8, left: 8, bgcolor: 'rgba(0,0,0,0.6)', borderRadius: 8, px: 1, py: 0.25 }}>
-                        <Typography variant="caption" color="white">Variation {img.variation_label}</Typography>
-                      </Box>
-                      {selectedImageForVideo === img.image_url && (
-                        <Box sx={{ position: 'absolute', top: 8, right: 8, bgcolor: '#3B82F6', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FontAwesomeIcon icon={faCheck} style={{ fontSize: '0.7em', color: 'white' }} />
-                        </Box>
-                      )}
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+            {generatedImages.length === 0 ? (
+              <Button
+                variant="contained"
+                onClick={handleGenerateImages}
+                disabled={imageGenLoading || concept?.status === 'rejected'}
+                startIcon={imageGenLoading
+                  ? <FontAwesomeIcon icon={faSpinner} spin />
+                  : <FontAwesomeIcon icon={faWandMagicSparkles} />
+                }
+                sx={{ borderRadius: 20, mb: 3 }}
+              >
+                {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
+              </Button>
+            ) : (
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ borderRadius: 3, overflow: 'hidden', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <img
+                    src={generatedImages[0].image_url}
+                    alt="Generated concept image"
+                    style={{ width: '100%', display: 'block' }}
+                  />
+                </Box>
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
+                  ✅ Image generated — one image per concept
+                </Typography>
+              </Box>
             )}
           </Box>
 
@@ -442,8 +432,7 @@ export default function ConceptDetailPage() {
                 <Chip label="FAL.AI" size="small" sx={{ bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', fontSize: '0.65rem', ml: 1 }} />
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Select an image above, then generate a 5-second video for social media.
-                {!selectedImageForVideo && ' (Select a variation first)'}
+                Generate a 5-second video from the concept image above.
               </Typography>
 
               {videoGenError && <Alert severity="error" sx={{ mb: 2 }}>{videoGenError}</Alert>}

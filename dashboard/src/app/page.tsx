@@ -93,6 +93,29 @@ function todayLabel() {
   return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function formatDayHeader(dateStr: string): string {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric',
+  });
+  if (dateStr === today) return `Today · ${label}`;
+  if (dateStr === yesterday) return `Yesterday · ${label}`;
+  return label;
+}
+
+function groupByDate(concepts: any[]): { date: string; items: any[] }[] {
+  const map = new Map<string, any[]>();
+  for (const c of concepts) {
+    const d = c.date || 'unknown';
+    if (!map.has(d)) map.set(d, []);
+    map.get(d)!.push(c);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([date, items]) => ({ date, items }));
+}
+
 function statusColor(status: string): 'success' | 'error' | 'default' {
   if (status === 'Approved') return 'success';
   if (status === 'Rejected') return 'error';
@@ -254,8 +277,11 @@ export default function DashboardHome() {
 
         <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
           <Container maxWidth="lg">
-            <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+            <Typography variant="h4" sx={{ mb: 0.5, fontWeight: 'bold' }}>
               {pageTitle}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              Generated every day at 10AM
             </Typography>
 
             {fetchError && (
@@ -294,8 +320,14 @@ export default function DashboardHome() {
               </Box>
             ) : (
               <Fade in={!loading} timeout={800}>
-                <Grid container spacing={4}>
-                  {concepts.map((concept) => (
+                <Box>
+                  {groupByDate(concepts).map(({ date, items }) => (
+                    <Box key={date} sx={{ mb: 6 }}>
+                      <Typography variant="overline" sx={{ color: 'text.disabled', letterSpacing: 1.5, fontWeight: 700, display: 'block', mb: 2, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 1 }}>
+                        {formatDayHeader(date)}
+                      </Typography>
+                      <Grid container spacing={4}>
+                  {items.map((concept) => (
                     <Grid item xs={12} md={4} key={concept.id}>
                       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         {concept.images.length > 0 && (
@@ -390,6 +422,9 @@ export default function DashboardHome() {
                     </Grid>
                   ))}
                 </Grid>
+                    </Box>
+                  ))}
+                </Box>
               </Fade>
             )}
           </Container>
