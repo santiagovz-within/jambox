@@ -5,13 +5,13 @@ import {
   Box, Container, Typography, Button, Chip, Alert, CircularProgress,
   Divider, TextField, Card, CardMedia, Grid, IconButton, Tooltip,
   CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions,
-  Select, MenuItem, FormControl, InputLabel, FormHelperText
+  Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft, faCheck, faXmark, faPenToSquare, faImage,
-  faVideo, faWandMagicSparkles, faSpinner, faChartBar, faTrash
+  faVideo, faWandMagicSparkles, faSpinner, faChartBar, faTrash, faCopy
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -86,6 +86,16 @@ export default function ConceptDetailPage() {
   // Delete
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Copy to clipboard
+  const [copied, setCopied] = useState(false);
+  const handleCopyCopy = () => {
+    const text = concept?.edited_copy || concept?.copy || '';
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   useEffect(() => {
     fetch(`/api/concepts/${id}`)
@@ -334,10 +344,17 @@ export default function ConceptDetailPage() {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <Box sx={{ mb: 4 }}>
-                <Typography variant="overline" color="primary" sx={{ letterSpacing: 2, fontWeight: 700 }}>
-                  📝 COPY
-                </Typography>
-                <Typography variant="body1" sx={{ mt: 1.5, p: 2.5, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0 }}>
+                  <Typography variant="overline" color="primary" sx={{ letterSpacing: 2, fontWeight: 700 }}>
+                    📝 COPY
+                  </Typography>
+                  <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
+                    <IconButton size="small" onClick={handleCopyCopy} sx={{ color: copied ? '#22c55e' : 'text.disabled' }}>
+                      <FontAwesomeIcon icon={copied ? faCheck : faCopy} style={{ fontSize: '0.85rem' }} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem' }}>
                   {concept?.edited_copy || concept?.copy}
                 </Typography>
                 {concept?.edited_copy && concept.edited_copy !== concept.copy && (
@@ -402,41 +419,48 @@ export default function ConceptDetailPage() {
             {imageGenError && <Alert severity="error" sx={{ mb: 2 }}>{imageGenError}</Alert>}
 
             {generatedImages.length === 0 ? (
-              <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap', mb: 3 }}>
-                <FormControl size="small" disabled={imageGenLoading}>
-                  <InputLabel>Aspect Ratio</InputLabel>
-                  <Select
-                    value={aspectRatio}
-                    label="Aspect Ratio"
-                    onChange={e => setAspectRatio(e.target.value)}
-                    sx={{ minWidth: 168, borderRadius: 2 }}
-                  >
-                    <MenuItem value="1:1">1:1 Square</MenuItem>
-                    <MenuItem value="9:16">9:16 Vertical</MenuItem>
-                    <MenuItem value="16:9">16:9 Horizontal</MenuItem>
-                    <MenuItem value="4:5">4:5 Portrait</MenuItem>
-                  </Select>
-                </FormControl>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                {/* Left: controls */}
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <FormControl size="small" disabled={imageGenLoading}>
+                    <InputLabel>Aspect Ratio</InputLabel>
+                    <Select
+                      value={aspectRatio}
+                      label="Aspect Ratio"
+                      onChange={e => setAspectRatio(e.target.value)}
+                      sx={{ minWidth: 168, borderRadius: 2 }}
+                    >
+                      <MenuItem value="1:1">1:1 Square</MenuItem>
+                      <MenuItem value="9:16">9:16 Vertical</MenuItem>
+                      <MenuItem value="16:9">16:9 Horizontal</MenuItem>
+                      <MenuItem value="4:5">4:5 Portrait</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <FormControl size="small" disabled={imageGenLoading}>
-                  <InputLabel>Format</InputLabel>
-                  <Select
-                    value={outputFormat}
-                    label="Format"
-                    onChange={e => setOutputFormat(e.target.value)}
-                    sx={{ minWidth: 100, borderRadius: 2 }}
-                  >
-                    <MenuItem value="JPG">JPG</MenuItem>
-                    <MenuItem value="PNG">PNG</MenuItem>
-                  </Select>
-                </FormControl>
+                  <FormControl size="small" disabled={imageGenLoading}>
+                    <InputLabel>Format</InputLabel>
+                    <Select
+                      value={outputFormat}
+                      label="Format"
+                      onChange={e => setOutputFormat(e.target.value)}
+                      sx={{ minWidth: 100, borderRadius: 2 }}
+                    >
+                      <MenuItem value="JPG">JPG</MenuItem>
+                      <MenuItem value="PNG">PNG</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <Chip
-                  label="🔒 1K Resolution"
-                  size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.05)', color: 'text.disabled', cursor: 'default' }}
-                />
+                  <Box sx={{
+                    height: 40, px: 1.5, display: 'flex', alignItems: 'center', gap: 0.75,
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 2,
+                    color: 'text.disabled', fontSize: '0.8125rem',
+                    bgcolor: 'rgba(255,255,255,0.03)', whiteSpace: 'nowrap',
+                  }}>
+                    🔒 1K Resolution
+                  </Box>
+                </Box>
 
+                {/* Right: generate button */}
                 <Button
                   variant="contained"
                   onClick={handleGenerateImages}
@@ -445,7 +469,7 @@ export default function ConceptDetailPage() {
                     ? <FontAwesomeIcon icon={faSpinner} spin />
                     : <FontAwesomeIcon icon={faWandMagicSparkles} />
                   }
-                  sx={{ borderRadius: 20 }}
+                  sx={{ borderRadius: 20, whiteSpace: 'nowrap' }}
                 >
                   {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
                 </Button>

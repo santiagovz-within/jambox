@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   AppBar, Toolbar, Typography, Container, Grid, Card, CardContent,
   CardMedia, CardActions, Chip, Drawer, Box, CssBaseline, Skeleton, Fade,
-  Menu, MenuItem, Button, Alert, IconButton, Tooltip
+  Menu, MenuItem, Button, Alert, IconButton, Tooltip, ToggleButtonGroup, ToggleButton
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -136,6 +136,7 @@ export default function DashboardHome() {
 
   const [brandAnchor, setBrandAnchor] = useState<null | HTMLElement>(null);
   const [monthAnchor, setMonthAnchor] = useState<null | HTMLElement>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'Pending' | 'Approved' | 'Rejected'>('all');
 
   const recentMonths = getRecentMonths();
   const activeBrandName = brands.find(b => b.brand_id === activeBrand)?.brand_name || activeBrand;
@@ -215,6 +216,10 @@ export default function DashboardHome() {
     ? `Today's Concepts — ${todayLabel()}`
     : `${activeMonthLabel} Concepts`;
 
+  const filteredConcepts = statusFilter === 'all'
+    ? concepts
+    : concepts.filter(c => c.status === statusFilter);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
@@ -280,9 +285,36 @@ export default function DashboardHome() {
             <Typography variant="h4" sx={{ mb: 0.5, fontWeight: 'bold' }}>
               {pageTitle}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Generated every day at 10AM
             </Typography>
+
+            <ToggleButtonGroup
+              value={statusFilter}
+              exclusive
+              onChange={(_, v) => { if (v !== null) setStatusFilter(v); }}
+              size="small"
+              sx={{
+                mb: 4,
+                '& .MuiToggleButton-root': {
+                  borderRadius: '20px !important',
+                  px: 2.5, py: 0.5,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: 'text.secondary',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  mx: 0.5,
+                  '&.Mui-selected': { color: 'white', bgcolor: 'rgba(59,130,246,0.2)', borderColor: '#3B82F6' },
+                  '&:first-of-type': { ml: 0 },
+                },
+              }}
+            >
+              <ToggleButton value="all">All</ToggleButton>
+              <ToggleButton value="Pending">Pending</ToggleButton>
+              <ToggleButton value="Approved">Approved</ToggleButton>
+              <ToggleButton value="Rejected">Declined</ToggleButton>
+            </ToggleButtonGroup>
 
             {fetchError && (
               <Alert severity="error" sx={{ mb: 3 }}>
@@ -311,17 +343,21 @@ export default function DashboardHome() {
                   ))}
                 </Grid>
               </Fade>
-            ) : concepts.length === 0 ? (
+            ) : filteredConcepts.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 10, color: 'text.secondary' }}>
-                <Typography variant="h6" sx={{ mb: 1 }}>No concepts for this period</Typography>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  {concepts.length === 0 ? 'No concepts for this period' : `No ${statusFilter === 'Rejected' ? 'declined' : statusFilter.toLowerCase()} concepts`}
+                </Typography>
                 <Typography variant="body2">
-                  Click <strong>Variables → Save &amp; Generate Now</strong> to create some, or pick a different month.
+                  {concepts.length === 0
+                    ? <>Click <strong>Variables → Save &amp; Generate Now</strong> to create some, or pick a different month.</>
+                    : 'Try a different filter above.'}
                 </Typography>
               </Box>
             ) : (
               <Fade in={!loading} timeout={800}>
                 <Box>
-                  {groupByDate(concepts).map(({ date, items }) => (
+                  {groupByDate(filteredConcepts).map(({ date, items }) => (
                     <Box key={date} sx={{ mb: 6 }}>
                       <Typography variant="overline" sx={{ color: 'text.disabled', letterSpacing: 1.5, fontWeight: 700, display: 'block', mb: 2, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 1 }}>
                         {formatDayHeader(date)}
