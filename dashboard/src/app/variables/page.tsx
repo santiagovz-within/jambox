@@ -250,7 +250,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: '16px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -258,7 +258,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
             >
               Save
             </Button>
@@ -351,7 +351,7 @@ function VariablesPageInner() {
                     <TextField size="small" placeholder="Add topic" value={pushInput} onChange={e => setPushInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && addChip(pushTopics, setPushTopics, pushInput, setPushInput)}
                       sx={{ flexGrow: 1 }} />
-                    <Button onClick={() => addChip(pushTopics, setPushTopics, pushInput, setPushInput)} variant="outlined" size="small" sx={{ borderRadius: 8 }}>
+                    <Button onClick={() => addChip(pushTopics, setPushTopics, pushInput, setPushInput)} variant="outlined" size="small" sx={{ borderRadius: 10 }}>
                       <Plus size={16} />
                     </Button>
                   </Box>
@@ -369,7 +369,7 @@ function VariablesPageInner() {
                     <TextField size="small" placeholder="Add topic to avoid" value={avoidInput} onChange={e => setAvoidInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && addChip(avoidTopics, setAvoidTopics, avoidInput, setAvoidInput)}
                       sx={{ flexGrow: 1 }} />
-                    <Button onClick={() => addChip(avoidTopics, setAvoidTopics, avoidInput, setAvoidInput)} variant="outlined" size="small" color="error" sx={{ borderRadius: 8 }}>
+                    <Button onClick={() => addChip(avoidTopics, setAvoidTopics, avoidInput, setAvoidInput)} variant="outlined" size="small" color="error" sx={{ borderRadius: 10 }}>
                       <Plus size={16} />
                     </Button>
                   </Box>
@@ -401,7 +401,7 @@ function VariablesPageInner() {
                   value={publicTopicInput} onChange={e => setPublicTopicInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addChip(publicTopics, setPublicTopics, publicTopicInput, setPublicTopicInput)}
                   sx={{ flexGrow: 1 }} />
-                <Button onClick={() => addChip(publicTopics, setPublicTopics, publicTopicInput, setPublicTopicInput)} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#f59e0b', color: '#f59e0b' }}>
+                <Button onClick={() => addChip(publicTopics, setPublicTopics, publicTopicInput, setPublicTopicInput)} variant="outlined" size="small" sx={{ borderRadius: 10, borderColor: '#f59e0b', color: '#f59e0b' }}>
                   <Plus size={16} />
                 </Button>
               </Box>
@@ -431,7 +431,7 @@ function VariablesPageInner() {
                   value={locationInput} onChange={e => setLocationInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addChip(locations, setLocations, locationInput, setLocationInput)}
                   sx={{ flexGrow: 1 }} />
-                <Button onClick={() => addChip(locations, setLocations, locationInput, setLocationInput)} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#22c55e', color: '#22c55e' }}>
+                <Button onClick={() => addChip(locations, setLocations, locationInput, setLocationInput)} variant="outlined" size="small" sx={{ borderRadius: 10, borderColor: '#22c55e', color: '#22c55e' }}>
                   <Plus size={16} />
                 </Button>
               </Box>
@@ -494,7 +494,7 @@ function VariablesPageInner() {
                   value={customTemporalInput} onChange={e => setCustomTemporalInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addCustomTemporal()}
                   sx={{ flexGrow: 1 }} />
-                <Button onClick={addCustomTemporal} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#8b5cf6', color: '#8b5cf6' }}>
+                <Button onClick={addCustomTemporal} variant="outlined" size="small" sx={{ borderRadius: 10, borderColor: '#8b5cf6', color: '#8b5cf6' }}>
                   <Plus size={16} />
                 </Button>
               </Box>
@@ -554,7 +554,7 @@ function VariablesPageInner() {
                           value={customNationalInput} onChange={e => setCustomNationalInput(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && addCustomSignal(customNationalInput, setCustomNationalInput, 'national')}
                           sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
-                        <Button onClick={() => addCustomSignal(customNationalInput, setCustomNationalInput, 'national')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1 }}>
+                        <Button onClick={() => addCustomSignal(customNationalInput, setCustomNationalInput, 'national')} variant="outlined" size="small" sx={{ borderRadius: 10, minWidth: 36, px: 1 }}>
                           <Plus size={16} />
                         </Button>
                       </Box>
@@ -575,7 +575,7 @@ function VariablesPageInner() {
                           value={customLocalInput} onChange={e => setCustomLocalInput(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && addCustomSignal(customLocalInput, setCustomLocalInput, 'local')}
                           sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
-                        <Button onClick={() => addCustomSignal(customLocalInput, setCustomLocalInput, 'local')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1, borderColor: '#22c55e', color: '#22c55e' }}>
+                        <Button onClick={() => addCustomSignal(customLocalInput, setCustomLocalInput, 'local')} variant="outlined" size="small" sx={{ borderRadius: 10, minWidth: 36, px: 1, borderColor: '#22c55e', color: '#22c55e' }}>
                           <Plus size={16} />
                         </Button>
                       </Box>
@@ -634,7 +634,7 @@ function VariablesPageInner() {
                 <Button
                   onClick={() => addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
                   variant="outlined" size="small"
-                  sx={{ borderRadius: 8, borderColor: '#f97316', color: '#f97316' }}
+                  sx={{ borderRadius: 10, borderColor: '#f97316', color: '#f97316' }}
                 >
                   <Plus size={16} />
                 </Button>
@@ -697,7 +697,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: 20, flex: 1 }}
+              sx={{ borderRadius: '16px', flex: 1 }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -705,11 +705,11 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
             >
               Save
             </Button>
-            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: 20 }}>
+            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: '16px' }}>
               Back
             </Button>
           </Box>

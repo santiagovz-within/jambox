@@ -18,10 +18,10 @@ const darkTheme = createTheme({
     primary: { main: '#3B82F6' },
     secondary: { main: '#8b5cf6' },
   },
-  shape: { borderRadius: 24 },
+  shape: { borderRadius: 20 },
   typography: {
     fontFamily: 'inherit',
-    button: { textTransform: 'none', fontWeight: 600 }
+    button: { textTransform: 'none', fontWeight: 600, lineHeight: 1 }
   },
   components: {
     MuiCard: {
@@ -31,6 +31,17 @@ const darkTheme = createTheme({
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
           border: '1px solid rgba(255, 255, 255, 0.05)',
         }
+      }
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: { lineHeight: 1, paddingTop: 7, paddingBottom: 7 }
+      }
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: { lineHeight: 1 },
+        sizeSmall: { paddingTop: 5, paddingBottom: 5 },
       }
     },
     MuiAppBar: {
@@ -231,7 +242,7 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={(e) => setBrandAnchor(e.currentTarget)}
-                sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
                 Brand: {activeBrandName}
                 <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
@@ -250,7 +261,7 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={(e) => setMonthAnchor(e.currentTarget)}
-                sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
                 {activeMonthLabel}
                 <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
@@ -268,7 +279,7 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={() => setDrawerOpen(!drawerOpen)}
-                sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
                 <Sliders size={16} color="#3B82F6" style={{ marginRight: 8 }} /> Variables
               </Button>
@@ -293,7 +304,7 @@ export default function DashboardHome() {
               sx={{
                 mb: 4,
                 '& .MuiToggleButton-root': {
-                  borderRadius: '20px !important',
+                  borderRadius: '16px !important',
                   px: 2.5, py: 0.5,
                   border: '1px solid rgba(255,255,255,0.12)',
                   color: 'text.secondary',
@@ -386,7 +397,7 @@ export default function DashboardHome() {
                             </Box>
                             <Chip label={concept.status} size="small" color={statusColor(concept.status)} />
                           </Box>
-                          <Typography variant="body1" sx={{ mb: 2, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             "{concept.copy}"
                           </Typography>
                           {concept.rationale && (
@@ -405,7 +416,7 @@ export default function DashboardHome() {
                               color="success"
                               onClick={() => handleAction(concept.id, 'approve')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
-                              sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
+                              sx={{ borderRadius: '10px', minWidth: 0, px: 1.5 }}
                             >
                               <Check size={14} style={{ marginRight: 4 }} /> YES
                             </Button>
@@ -417,7 +428,7 @@ export default function DashboardHome() {
                               color="error"
                               onClick={() => handleAction(concept.id, 'reject')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
-                              sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
+                              sx={{ borderRadius: '10px', minWidth: 0, px: 1.5 }}
                             >
                               <X size={14} style={{ marginRight: 4 }} /> NO
                             </Button>
@@ -427,7 +438,7 @@ export default function DashboardHome() {
                               <IconButton
                                 size="small"
                                 onClick={() => router.push(`/concepts/${concept.id}`)}
-                                sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8 }}
+                                sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px' }}
                               >
                                 <Edit size={14} />
                               </IconButton>

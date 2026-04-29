@@ -1,9 +1,8 @@
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Manrope } from "next/font/google";
 
-const plusJakarta = Plus_Jakarta_Sans({ 
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-plus-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 export const metadata = {
@@ -18,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={plusJakarta.className} style={{ margin: 0, backgroundColor: '#0A0A0A', color: '#fff', display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+      <body className={manrope.className} style={{ margin: 0, backgroundColor: '#0A0A0A', color: '#fff', display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
         {children}
       </body>
     </html>

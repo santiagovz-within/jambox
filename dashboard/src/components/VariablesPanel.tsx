@@ -147,7 +147,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
             fullWidth
             endIcon={<ExternalLink size={14} />}
             onClick={() => { onClose(); router.push('/variables'); }}
-            sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', justifyContent: 'space-between', px: 2.5 }}
+            sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', justifyContent: 'space-between', px: 2.5 }}
           >
             See All Variables
           </Button>
@@ -165,7 +165,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
               onClick={() => handleSave(true)}
               disabled={saving || generating}
               fullWidth
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: '16px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -175,7 +175,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
               onClick={() => handleSave(false)}
               disabled={saving || generating}
               fullWidth
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: '16px' }}
             >
               Save for Tomorrow
             </Button>

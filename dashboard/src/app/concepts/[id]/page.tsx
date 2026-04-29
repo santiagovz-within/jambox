@@ -267,7 +267,7 @@ export default function ConceptDetailPage() {
               startIcon={<Check size={16} />}
               onClick={() => handleAction('approve')}
               disabled={!!actionLoading || !isPending}
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: '16px' }}
             >
               {actionLoading === 'approve' ? 'Approving…' : 'YES — Approve'}
             </Button>
@@ -277,7 +277,7 @@ export default function ConceptDetailPage() {
               startIcon={<X size={16} />}
               onClick={() => handleAction('reject')}
               disabled={!!actionLoading || !isPending}
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: '16px' }}
             >
               {actionLoading === 'reject' ? 'Declining…' : 'NO — Decline'}
             </Button>
@@ -286,7 +286,7 @@ export default function ConceptDetailPage() {
               startIcon={<Edit2 size={16} />}
               onClick={() => setEditMode(!editMode)}
               disabled={!!actionLoading}
-              sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
             >
               Edit & Approve
             </Button>
@@ -298,7 +298,7 @@ export default function ConceptDetailPage() {
               color="error"
               startIcon={<Trash2 size={16} />}
               onClick={() => setDeleteDialogOpen(true)}
-              sx={{ borderRadius: 20, borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
+              sx={{ borderRadius: '16px', borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
             >
               Delete concept
             </Button>
@@ -323,11 +323,11 @@ export default function ConceptDetailPage() {
                   color="success"
                   onClick={() => handleAction('edit')}
                   disabled={!!actionLoading}
-                  sx={{ borderRadius: 20 }}
+                  sx={{ borderRadius: '16px' }}
                 >
                   {actionLoading === 'edit' ? 'Saving…' : 'Confirm Approval with Edits'}
                 </Button>
-                <Button onClick={() => setEditMode(false)} sx={{ borderRadius: 20, color: 'text.secondary' }}>
+                <Button onClick={() => setEditMode(false)} sx={{ borderRadius: '16px', color: 'text.secondary' }}>
                   Cancel
                 </Button>
               </Box>
@@ -350,7 +350,7 @@ export default function ConceptDetailPage() {
                     </IconButton>
                   </Tooltip>
                 </Box>
-                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem' }}>
+                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem', fontWeight: 600 }}>
                   {concept?.edited_copy || concept?.copy}
                 </Typography>
                 {concept?.edited_copy && concept.edited_copy !== concept.copy && (
@@ -462,7 +462,7 @@ export default function ConceptDetailPage() {
                   onClick={handleGenerateImages}
                   disabled={imageGenLoading || concept?.status === 'rejected'}
                   startIcon={imageGenLoading ? <CircularProgress size={16} /> : <Zap size={16} />}
-                  sx={{ borderRadius: 20, whiteSpace: 'nowrap' }}
+                  sx={{ borderRadius: '16px', whiteSpace: 'nowrap' }}
                 >
                   {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
                 </Button>
@@ -502,7 +502,7 @@ export default function ConceptDetailPage() {
                 onClick={handleGenerateVideo}
                 disabled={videoGenLoading || !selectedImageForVideo}
                 startIcon={videoGenLoading ? <CircularProgress size={16} /> : <Video size={16} />}
-                sx={{ borderRadius: 20, borderColor: '#8b5cf6', color: '#8b5cf6', mb: 3 }}
+                sx={{ borderRadius: '16px', borderColor: '#8b5cf6', color: '#8b5cf6', mb: 3 }}
               >
                 {videoGenLoading ? 'Generating video… (~2 min)' : 'Generate video from selected image'}
               </Button>
@@ -544,7 +544,7 @@ export default function ConceptDetailPage() {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ borderRadius: 20, color: 'text.secondary' }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ borderRadius: '16px', color: 'text.secondary' }}>
             Cancel
           </Button>
           <Button
@@ -552,7 +552,7 @@ export default function ConceptDetailPage() {
             color="error"
             onClick={handleDelete}
             disabled={deleteLoading}
-            sx={{ borderRadius: 20 }}
+            sx={{ borderRadius: '16px' }}
           >
             {deleteLoading ? 'Deleting…' : 'Yes, delete it'}
           </Button>
