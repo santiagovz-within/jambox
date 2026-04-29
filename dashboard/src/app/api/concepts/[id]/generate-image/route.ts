@@ -66,6 +66,12 @@ async function generateAndUpload(
   const fileName = `concepts/${conceptId}/${Date.now()}.${ext}`;
   const imageBuffer = Buffer.from(base64, 'base64');
 
+  // Ensure bucket exists (creates it on first use)
+  const { data: buckets } = await supabase.storage.listBuckets();
+  if (!buckets?.find(b => b.name === 'concept-images')) {
+    await supabase.storage.createBucket('concept-images', { public: true });
+  }
+
   const { error: uploadError } = await supabase.storage
     .from('concept-images')
     .upload(fileName, imageBuffer, { contentType: mimeType || 'image/jpeg' });
