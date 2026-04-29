@@ -7,12 +7,7 @@ import {
   FormControlLabel, FormLabel, Accordion, AccordionSummary, AccordionDetails, Tooltip
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft, faWandMagicSparkles, faPlus, faXmark, faRotate,
-  faCalendarDays, faChartLine, faSliders, faLocationDot, faChevronDown,
-  faUtensils, faLink
-} from '@fortawesome/free-solid-svg-icons';
+import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link } from 'react-feather';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -244,10 +239,10 @@ function VariablesPageInner() {
         {/* Header */}
         <Box sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 10, bgcolor: '#0A0A0A' }}>
           <IconButton onClick={() => router.push('/')} sx={{ color: 'white' }}>
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <ArrowLeft size={20} />
           </IconButton>
           <Typography variant="h6" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FontAwesomeIcon icon={faWandMagicSparkles} style={{ color: '#3B82F6' }} /> JamBox
+            <Zap size={18} color="#3B82F6" /> JamBox
           </Typography>
           <Typography variant="body2" color="text.secondary">/ Variables</Typography>
           <Box sx={{ ml: 'auto', display: 'flex', gap: 2 }}>
@@ -294,9 +289,9 @@ function VariablesPageInner() {
 
           {/* Section: Creative Foundation */}
           <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <FontAwesomeIcon icon={faSliders} style={{ color: '#3B82F6' }} />
+                <Sliders size={16} color="#3B82F6" />
                 <Typography fontWeight="bold">Creative Foundation</Typography>
               </Box>
             </AccordionSummary>
@@ -357,7 +352,7 @@ function VariablesPageInner() {
                       onKeyDown={e => e.key === 'Enter' && addChip(pushTopics, setPushTopics, pushInput, setPushInput)}
                       sx={{ flexGrow: 1 }} />
                     <Button onClick={() => addChip(pushTopics, setPushTopics, pushInput, setPushInput)} variant="outlined" size="small" sx={{ borderRadius: 8 }}>
-                      <FontAwesomeIcon icon={faPlus} />
+                      <Plus size={16} />
                     </Button>
                   </Box>
                 </Box>
@@ -375,7 +370,7 @@ function VariablesPageInner() {
                       onKeyDown={e => e.key === 'Enter' && addChip(avoidTopics, setAvoidTopics, avoidInput, setAvoidInput)}
                       sx={{ flexGrow: 1 }} />
                     <Button onClick={() => addChip(avoidTopics, setAvoidTopics, avoidInput, setAvoidInput)} variant="outlined" size="small" color="error" sx={{ borderRadius: 8 }}>
-                      <FontAwesomeIcon icon={faPlus} />
+                      <Plus size={16} />
                     </Button>
                   </Box>
                 </Box>
@@ -385,9 +380,9 @@ function VariablesPageInner() {
 
           {/* Section: Public Topic Alignment */}
           <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <FontAwesomeIcon icon={faChartLine} style={{ color: '#f59e0b' }} />
+                <TrendingUp size={16} color="#f59e0b" />
                 <Typography fontWeight="bold">Public Topic Alignment</Typography>
                 <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Celebrities, sports, cultural moments</Typography>
               </Box>
@@ -407,7 +402,7 @@ function VariablesPageInner() {
                   onKeyDown={e => e.key === 'Enter' && addChip(publicTopics, setPublicTopics, publicTopicInput, setPublicTopicInput)}
                   sx={{ flexGrow: 1 }} />
                 <Button onClick={() => addChip(publicTopics, setPublicTopics, publicTopicInput, setPublicTopicInput)} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#f59e0b', color: '#f59e0b' }}>
-                  <FontAwesomeIcon icon={faPlus} />
+                  <Plus size={16} />
                 </Button>
               </Box>
             </AccordionDetails>
@@ -415,9 +410,9 @@ function VariablesPageInner() {
 
           {/* Section: Locations */}
           <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <FontAwesomeIcon icon={faLocationDot} style={{ color: '#22c55e' }} />
+                <MapPin size={16} color="#22c55e" />
                 <Typography fontWeight="bold">Locations / Key Markets</Typography>
                 <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Weather-aware, geo-relevant content</Typography>
               </Box>
@@ -437,7 +432,7 @@ function VariablesPageInner() {
                   onKeyDown={e => e.key === 'Enter' && addChip(locations, setLocations, locationInput, setLocationInput)}
                   sx={{ flexGrow: 1 }} />
                 <Button onClick={() => addChip(locations, setLocations, locationInput, setLocationInput)} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#22c55e', color: '#22c55e' }}>
-                  <FontAwesomeIcon icon={faPlus} />
+                  <Plus size={16} />
                 </Button>
               </Box>
             </AccordionDetails>
@@ -445,9 +440,9 @@ function VariablesPageInner() {
 
           {/* Section: Temporal / Calendar Context */}
           <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                <FontAwesomeIcon icon={faCalendarDays} style={{ color: '#8b5cf6' }} />
+                <Calendar size={16} color="#8b5cf6" />
                 <Typography fontWeight="bold">Temporal / Calendar Context</Typography>
                 <Chip label="Auto-generated" size="small" sx={{ bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', fontSize: '0.65rem', ml: 1 }} />
               </Box>
@@ -459,7 +454,7 @@ function VariablesPageInner() {
                 </Typography>
                 <Button
                   size="small"
-                  startIcon={contextLoading ? <CircularProgress size={12} /> : <FontAwesomeIcon icon={faRotate} />}
+                  startIcon={contextLoading ? <CircularProgress size={12} /> : <RefreshCw size={14} />}
                   onClick={regenerateContext}
                   disabled={contextLoading}
                   sx={{ borderRadius: 16, color: '#8b5cf6', borderColor: '#8b5cf6' }}
@@ -487,7 +482,7 @@ function VariablesPageInner() {
                         {entry.relevance && <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>{entry.relevance}</Typography>}
                       </Box>
                       <IconButton size="small" onClick={() => setTemporalContext(temporalContext.filter((_, j) => j !== i))}>
-                        <FontAwesomeIcon icon={faXmark} style={{ fontSize: '0.7em' }} />
+                        <X size={14} />
                       </IconButton>
                     </Box>
                   ))}
@@ -500,7 +495,7 @@ function VariablesPageInner() {
                   onKeyDown={e => e.key === 'Enter' && addCustomTemporal()}
                   sx={{ flexGrow: 1 }} />
                 <Button onClick={addCustomTemporal} variant="outlined" size="small" sx={{ borderRadius: 8, borderColor: '#8b5cf6', color: '#8b5cf6' }}>
-                  <FontAwesomeIcon icon={faPlus} />
+                  <Plus size={16} />
                 </Button>
               </Box>
             </AccordionDetails>
@@ -508,9 +503,9 @@ function VariablesPageInner() {
 
           {/* Section: Trend Signals */}
           <Accordion sx={{ mb: 4 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                <FontAwesomeIcon icon={faChartLine} style={{ color: '#3B82F6' }} />
+                <TrendingUp size={16} color="#3B82F6" />
                 <Typography fontWeight="bold">Trend Signals</Typography>
                 <Chip label="Auto-generated weekly" size="small" sx={{ bgcolor: 'rgba(59,130,246,0.15)', color: '#3B82F6', fontSize: '0.65rem', ml: 1 }} />
               </Box>
@@ -537,7 +532,7 @@ function VariablesPageInner() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, flexShrink: 0 }}>
                       <Chip label={signal.strength} size="small" sx={{ fontSize: '0.6rem', bgcolor: `${signalColor[signal.strength]}22`, color: signalColor[signal.strength], border: `1px solid ${signalColor[signal.strength]}44` }} />
                       <IconButton size="small" onClick={() => setTrendSignals(trendSignals.filter((_, j) => j !== originalIdx))}>
-                        <FontAwesomeIcon icon={faXmark} style={{ fontSize: '0.65em' }} />
+                        <X size={13} />
                       </IconButton>
                     </Box>
                   </Box>
@@ -560,7 +555,7 @@ function VariablesPageInner() {
                           onKeyDown={e => e.key === 'Enter' && addCustomSignal(customNationalInput, setCustomNationalInput, 'national')}
                           sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
                         <Button onClick={() => addCustomSignal(customNationalInput, setCustomNationalInput, 'national')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1 }}>
-                          <FontAwesomeIcon icon={faPlus} />
+                          <Plus size={16} />
                         </Button>
                       </Box>
                     </Box>
@@ -581,7 +576,7 @@ function VariablesPageInner() {
                           onKeyDown={e => e.key === 'Enter' && addCustomSignal(customLocalInput, setCustomLocalInput, 'local')}
                           sx={{ flexGrow: 1 }} inputProps={{ style: { fontSize: '0.78rem' } }} />
                         <Button onClick={() => addCustomSignal(customLocalInput, setCustomLocalInput, 'local')} variant="outlined" size="small" sx={{ borderRadius: 8, minWidth: 36, px: 1, borderColor: '#22c55e', color: '#22c55e' }}>
-                          <FontAwesomeIcon icon={faPlus} />
+                          <Plus size={16} />
                         </Button>
                       </Box>
                     </Box>
@@ -602,9 +597,9 @@ function VariablesPageInner() {
 
           {/* Section: Menu Items */}
           <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <FontAwesomeIcon icon={faUtensils} style={{ color: '#f97316' }} />
+                <Coffee size={16} color="#f97316" />
                 <Typography fontWeight="bold">Menu Items / Products</Typography>
                 <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Scope generations to specific products</Typography>
               </Box>
@@ -641,7 +636,7 @@ function VariablesPageInner() {
                   variant="outlined" size="small"
                   sx={{ borderRadius: 8, borderColor: '#f97316', color: '#f97316' }}
                 >
-                  <FontAwesomeIcon icon={faPlus} />
+                  <Plus size={16} />
                 </Button>
               </Box>
             </AccordionDetails>
@@ -649,9 +644,9 @@ function VariablesPageInner() {
 
           {/* Section: Brand Resource Links */}
           <Accordion sx={{ mb: 4 }}>
-            <AccordionSummary expandIcon={<FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.8em' }} />}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <FontAwesomeIcon icon={faLink} style={{ color: '#94a3b8' }} />
+                <Link size={16} color="#94a3b8" />
                 <Typography fontWeight="bold">Brand Resource Links</Typography>
                 <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Google Sheets & Drive integrations</Typography>
               </Box>

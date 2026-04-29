@@ -8,11 +8,7 @@ import {
   Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft, faCheck, faXmark, faPenToSquare, faImage,
-  faVideo, faWandMagicSparkles, faSpinner, faChartBar, faTrash, faCopy
-} from '@fortawesome/free-solid-svg-icons';
+import { ArrowLeft, Check, X, Edit2, Image as ImageIcon, Video, Zap, BarChart2, Trash2, Copy } from 'react-feather';
 import { useRouter, useParams } from 'next/navigation';
 
 const darkTheme = createTheme({
@@ -230,10 +226,10 @@ export default function ConceptDetailPage() {
         {/* Header */}
         <Box sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
           <IconButton onClick={() => router.push('/')} sx={{ color: 'white' }}>
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <ArrowLeft size={20} />
           </IconButton>
           <Typography variant="h6" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FontAwesomeIcon icon={faWandMagicSparkles} style={{ color: '#3B82F6' }} /> JamBox
+            <Zap size={18} color="#3B82F6" /> JamBox
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
             / Concept Detail
@@ -268,7 +264,7 @@ export default function ConceptDetailPage() {
             <Button
               variant="contained"
               color="success"
-              startIcon={<FontAwesomeIcon icon={faCheck} />}
+              startIcon={<Check size={16} />}
               onClick={() => handleAction('approve')}
               disabled={!!actionLoading || !isPending}
               sx={{ borderRadius: 20 }}
@@ -278,7 +274,7 @@ export default function ConceptDetailPage() {
             <Button
               variant="contained"
               color="error"
-              startIcon={<FontAwesomeIcon icon={faXmark} />}
+              startIcon={<X size={16} />}
               onClick={() => handleAction('reject')}
               disabled={!!actionLoading || !isPending}
               sx={{ borderRadius: 20 }}
@@ -287,7 +283,7 @@ export default function ConceptDetailPage() {
             </Button>
             <Button
               variant="outlined"
-              startIcon={<FontAwesomeIcon icon={faPenToSquare} />}
+              startIcon={<Edit2 size={16} />}
               onClick={() => setEditMode(!editMode)}
               disabled={!!actionLoading}
               sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
@@ -300,7 +296,7 @@ export default function ConceptDetailPage() {
             <Button
               variant="outlined"
               color="error"
-              startIcon={<FontAwesomeIcon icon={faTrash} />}
+              startIcon={<Trash2 size={16} />}
               onClick={() => setDeleteDialogOpen(true)}
               sx={{ borderRadius: 20, borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
             >
@@ -350,7 +346,7 @@ export default function ConceptDetailPage() {
                   </Typography>
                   <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
                     <IconButton size="small" onClick={handleCopyCopy} sx={{ color: copied ? '#22c55e' : 'text.disabled' }}>
-                      <FontAwesomeIcon icon={copied ? faCheck : faCopy} style={{ fontSize: '0.85rem' }} />
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -389,7 +385,7 @@ export default function ConceptDetailPage() {
 
               <Box sx={{ mb: 4, p: 2.5, bgcolor: 'rgba(59, 130, 246, 0.05)', borderRadius: 2, border: '1px solid rgba(59,130,246,0.15)' }}>
                 <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FontAwesomeIcon icon={faChartBar} /> SPROUT AI DATA BACKING NOTES
+                  <BarChart2 size={16} /> SPROUT AI DATA BACKING NOTES
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7 }}>
                   {concept?.sprout_data_notes || 'No Sprout Social data available. Set SPROUT_API_TOKEN in environment variables to enable live data backing.'}
@@ -403,7 +399,7 @@ export default function ConceptDetailPage() {
           {/* Image Generation Section */}
           <Box sx={{ mb: 6 }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FontAwesomeIcon icon={faImage} style={{ color: '#3B82F6' }} /> Image Generation
+              <ImageIcon size={18} color="#3B82F6" /> Image Generation
             </Typography>
 
             {/* Suggested prompt */}
@@ -465,10 +461,7 @@ export default function ConceptDetailPage() {
                   variant="contained"
                   onClick={handleGenerateImages}
                   disabled={imageGenLoading || concept?.status === 'rejected'}
-                  startIcon={imageGenLoading
-                    ? <FontAwesomeIcon icon={faSpinner} spin />
-                    : <FontAwesomeIcon icon={faWandMagicSparkles} />
-                  }
+                  startIcon={imageGenLoading ? <CircularProgress size={16} /> : <Zap size={16} />}
                   sx={{ borderRadius: 20, whiteSpace: 'nowrap' }}
                 >
                   {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
@@ -495,7 +488,7 @@ export default function ConceptDetailPage() {
             <Box sx={{ mb: 6 }}>
               <Divider sx={{ mb: 4 }} />
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <FontAwesomeIcon icon={faVideo} style={{ color: '#8b5cf6' }} /> Video Generation
+                <Video size={18} color="#8b5cf6" /> Video Generation
                 <Chip label="FAL.AI" size="small" sx={{ bgcolor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', fontSize: '0.65rem', ml: 1 }} />
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -508,10 +501,7 @@ export default function ConceptDetailPage() {
                 variant="outlined"
                 onClick={handleGenerateVideo}
                 disabled={videoGenLoading || !selectedImageForVideo}
-                startIcon={videoGenLoading
-                  ? <FontAwesomeIcon icon={faSpinner} spin />
-                  : <FontAwesomeIcon icon={faVideo} />
-                }
+                startIcon={videoGenLoading ? <CircularProgress size={16} /> : <Video size={16} />}
                 sx={{ borderRadius: 20, borderColor: '#8b5cf6', color: '#8b5cf6', mb: 3 }}
               >
                 {videoGenLoading ? 'Generating video… (~2 min)' : 'Generate video from selected image'}

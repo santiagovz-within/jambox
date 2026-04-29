@@ -6,11 +6,7 @@ import {
   CardMedia, CardActions, Chip, Drawer, Box, CssBaseline, Skeleton, Fade,
   Menu, MenuItem, Button, Alert, IconButton, Tooltip, ToggleButtonGroup, ToggleButton
 } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faChevronDown, faSliders, faWandMagicSparkles,
-  faCheck, faXmark, faPenToSquare, faArrowUpRightFromSquare
-} from '@fortawesome/free-solid-svg-icons';
+import { ChevronDown, Sliders, Zap, Check, X, Edit2, ExternalLink } from 'react-feather';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import VariablesPanel from '../components/VariablesPanel';
@@ -227,7 +223,7 @@ export default function DashboardHome() {
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar sx={{ pt: 1, pb: 1 }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <FontAwesomeIcon icon={faWandMagicSparkles} style={{ color: '#3B82F6' }} /> JamBox
+              <Zap size={18} color="#3B82F6" /> JamBox
             </Typography>
             <Box sx={{ display: 'flex', gap: 1.5 }}>
 
@@ -238,7 +234,7 @@ export default function DashboardHome() {
                 sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
                 Brand: {activeBrandName}
-                <FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.65em', marginLeft: 8, opacity: 0.7 }} />
+                <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
               </Button>
               <Menu anchorEl={brandAnchor} open={Boolean(brandAnchor)} onClose={() => setBrandAnchor(null)}>
                 {brands.map(b => (
@@ -257,7 +253,7 @@ export default function DashboardHome() {
                 sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
                 {activeMonthLabel}
-                <FontAwesomeIcon icon={faChevronDown} style={{ fontSize: '0.65em', marginLeft: 8, opacity: 0.7 }} />
+                <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
               </Button>
               <Menu anchorEl={monthAnchor} open={Boolean(monthAnchor)} onClose={() => setMonthAnchor(null)}>
                 {recentMonths.map(m => (
@@ -274,7 +270,7 @@ export default function DashboardHome() {
                 onClick={() => setDrawerOpen(!drawerOpen)}
                 sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
               >
-                <FontAwesomeIcon icon={faSliders} style={{ marginRight: 8, color: '#3B82F6' }} /> Variables
+                <Sliders size={16} color="#3B82F6" style={{ marginRight: 8 }} /> Variables
               </Button>
             </Box>
           </Toolbar>
@@ -411,7 +407,7 @@ export default function DashboardHome() {
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
                               sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
                             >
-                              <FontAwesomeIcon icon={faCheck} style={{ marginRight: 4 }} /> YES
+                              <Check size={14} style={{ marginRight: 4 }} /> YES
                             </Button>
 
                             {/* NO */}
@@ -423,7 +419,7 @@ export default function DashboardHome() {
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
                               sx={{ borderRadius: 12, minWidth: 0, px: 1.5 }}
                             >
-                              <FontAwesomeIcon icon={faXmark} style={{ marginRight: 4 }} /> NO
+                              <X size={14} style={{ marginRight: 4 }} /> NO
                             </Button>
 
                             {/* EDIT & APPROVE */}
@@ -433,7 +429,7 @@ export default function DashboardHome() {
                                 onClick={() => router.push(`/concepts/${concept.id}`)}
                                 sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8 }}
                               >
-                                <FontAwesomeIcon icon={faPenToSquare} style={{ fontSize: '0.85em' }} />
+                                <Edit2 size={14} />
                               </IconButton>
                             </Tooltip>
                           </Box>
@@ -449,7 +445,7 @@ export default function DashboardHome() {
                             )}
                             <Tooltip title="Open detail">
                               <IconButton size="small" onClick={() => router.push(`/concepts/${concept.id}`)}>
-                                <FontAwesomeIcon icon={faArrowUpRightFromSquare} style={{ fontSize: '0.75em', opacity: 0.4 }} />
+                                <ExternalLink size={12} style={{ opacity: 0.4 }} />
                               </IconButton>
                             </Tooltip>
                           </Box>

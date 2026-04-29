@@ -5,8 +5,7 @@ import {
   Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio,
   TextField, Button, Chip, Divider, Slider, Alert, CircularProgress
 } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSliders, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { Sliders, ExternalLink } from 'react-feather';
 import { useRouter } from 'next/navigation';
 
 export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_shop" }: { onClose: () => void, activeBrandId?: string }) {
@@ -89,7 +88,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <FontAwesomeIcon icon={faSliders} style={{ color: '#3B82F6' }} /> Variables
+        <Sliders size={18} color="#3B82F6" /> Variables
         <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto', fontWeight: 400 }}>
           {activeBrandId}
         </Typography>
@@ -146,7 +145,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
           <Button
             variant="outlined"
             fullWidth
-            endIcon={<FontAwesomeIcon icon={faArrowUpRightFromSquare} style={{ fontSize: '0.8em' }} />}
+            endIcon={<ExternalLink size={14} />}
             onClick={() => { onClose(); router.push('/variables'); }}
             sx={{ borderRadius: 20, borderColor: 'rgba(255,255,255,0.15)', color: 'white', justifyContent: 'space-between', px: 2.5 }}
           >
