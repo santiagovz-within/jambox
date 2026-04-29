@@ -39,17 +39,18 @@ async function generateAndUpload(
       const model = genAI.getGenerativeModel({ model: modelName });
       const result = await model.generateContent({
         contents: [{ role: 'user', parts }],
-        generationConfig: { responseModalities: ['IMAGE'] } as any,
+        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } as any,
       });
 
       const allParts = result.response.candidates?.[0]?.content?.parts || [];
-      console.log(`[ImageGen] ${modelName} returned ${allParts.length} part(s):`,
-        allParts.map((p: any) => p.inlineData ? `image(${p.inlineData.mimeType})` : `text(${(p.text || '').slice(0, 60)})`).join(' | ')
-      );
+      const partSummary = allParts.map((p: any) => p.inlineData ? `image(${p.inlineData.mimeType})` : `text(${(p.text || '').slice(0, 120)})`).join(' | ');
+      console.log(`[ImageGen] ${modelName} returned ${allParts.length} part(s): ${partSummary}`);
 
       imagePart = allParts.find((p: any) => p.inlineData);
       if (imagePart) { console.log(`[ImageGen] Got image from ${modelName}`); break; }
-      modelErrors.push(`${modelName}: responded but returned no image part`);
+
+      const textParts = allParts.filter((p: any) => p.text).map((p: any) => p.text).join(' ');
+      modelErrors.push(`${modelName}: no image part${textParts ? ` — model said: "${textParts.slice(0, 200)}"` : ''}`);
     } catch (e: any) {
       console.warn(`[ImageGen] Model ${modelName} failed: ${e.message}`);
       modelErrors.push(`${modelName}: ${e.message}`);
