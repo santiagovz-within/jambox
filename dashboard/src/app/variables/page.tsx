@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Container, Typography, Button, TextField, Chip, Slider, Alert, CircularProgress,
-  Divider, IconButton, CssBaseline, Card, CardContent, RadioGroup, Radio,
-  FormControlLabel, FormLabel, Accordion, AccordionSummary, AccordionDetails, Tooltip
+  IconButton, CssBaseline, FormLabel, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link, Globe } from 'react-feather';
@@ -23,6 +22,8 @@ const darkTheme = createTheme({
   components: {
     MuiCard: { styleOverrides: { root: { backgroundImage: 'none', border: '1px solid rgba(255,255,255,0.05)' } } },
     MuiAccordion: { styleOverrides: { root: { backgroundImage: 'none', backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.05)', '&:before': { display: 'none' } } } },
+    MuiChip: { styleOverrides: { root: { paddingBottom: '2px' } } },
+    MuiButton: { styleOverrides: { root: { lineHeight: 1 }, sizeSmall: { paddingTop: 5, paddingBottom: 5 } } },
   }
 });
 

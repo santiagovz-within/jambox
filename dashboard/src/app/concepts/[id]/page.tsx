@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Button, Chip, Alert, CircularProgress,
-  Divider, TextField, Card, CardMedia, Grid, IconButton, Tooltip,
+  Divider, TextField, Grid, IconButton, Tooltip,
   CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions,
   Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
@@ -32,11 +32,16 @@ const darkTheme = createTheme({
           border: '1px solid rgba(255,255,255,0.05)',
         }
       }
+    },
+    MuiChip: {
+      styleOverrides: { root: { paddingBottom: '2px' } }
+    },
+    MuiButton: {
+      styleOverrides: { root: { lineHeight: 1 }, sizeSmall: { paddingTop: 5, paddingBottom: 5 } }
     }
   }
 });
 
-type ConceptStatus = 'pending' | 'approved' | 'rejected';
 
 function formatContentType(ct: string) {
   const map: Record<string, string> = {
@@ -306,7 +311,7 @@ export default function ConceptDetailPage() {
 
           {/* Edit mode */}
           {editMode && (
-            <Box sx={{ mb: 4, p: 3, bgcolor: '#1e1e1e', borderRadius: 3, border: '1px solid rgba(255,255,255,0.1)' }}>
+            <Box sx={{ mb: 4, p: 3, bgcolor: '#1e1e1e', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Edit Copy</Typography>
               <TextField
                 multiline
@@ -350,7 +355,7 @@ export default function ConceptDetailPage() {
                     </IconButton>
                   </Tooltip>
                 </Box>
-                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem', fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem', fontWeight: 600 }}>
                   {concept?.edited_copy || concept?.copy}
                 </Typography>
                 {concept?.edited_copy && concept.edited_copy !== concept.copy && (
@@ -383,7 +388,7 @@ export default function ConceptDetailPage() {
                 )}
               </Box>
 
-              <Box sx={{ mb: 4, p: 2.5, bgcolor: 'rgba(59, 130, 246, 0.05)', borderRadius: 2, border: '1px solid rgba(59,130,246,0.15)' }}>
+              <Box sx={{ mb: 4, p: 2.5, bgcolor: 'rgba(59, 130, 246, 0.05)', borderRadius: '20px', border: '1px solid rgba(59,130,246,0.15)' }}>
                 <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <BarChart2 size={16} /> SPROUT AI DATA BACKING NOTES
                 </Typography>
@@ -403,7 +408,7 @@ export default function ConceptDetailPage() {
             </Typography>
 
             {/* Suggested prompt */}
-            <Box sx={{ mb: 3, p: 2, bgcolor: '#1a1a1a', borderRadius: 2, border: '1px solid rgba(255,255,255,0.06)' }}>
+            <Box sx={{ mb: 3, p: 2, bgcolor: '#1a1a1a', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>
               <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.5 }}>
                 AI image prompt
               </Typography>
@@ -424,7 +429,7 @@ export default function ConceptDetailPage() {
                       value={aspectRatio}
                       label="Aspect Ratio"
                       onChange={e => setAspectRatio(e.target.value)}
-                      sx={{ minWidth: 168, borderRadius: 2 }}
+                      sx={{ minWidth: 168, borderRadius: '10px' }}
                     >
                       <MenuItem value="1:1">1:1 Square</MenuItem>
                       <MenuItem value="9:16">9:16 Vertical</MenuItem>
@@ -439,7 +444,7 @@ export default function ConceptDetailPage() {
                       value={outputFormat}
                       label="Format"
                       onChange={e => setOutputFormat(e.target.value)}
-                      sx={{ minWidth: 100, borderRadius: 2 }}
+                      sx={{ minWidth: 100, borderRadius: '10px' }}
                     >
                       <MenuItem value="JPG">JPG</MenuItem>
                       <MenuItem value="PNG">PNG</MenuItem>
@@ -448,7 +453,7 @@ export default function ConceptDetailPage() {
 
                   <Box sx={{
                     height: 40, px: 1.5, display: 'flex', alignItems: 'center', gap: 0.75,
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 2,
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px',
                     color: 'text.disabled', fontSize: '0.8125rem',
                     bgcolor: 'rgba(255,255,255,0.03)', whiteSpace: 'nowrap',
                   }}>
@@ -469,7 +474,7 @@ export default function ConceptDetailPage() {
               </Box>
             ) : (
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ borderRadius: 3, overflow: 'hidden', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Box sx={{ borderRadius: '20px', overflow: 'hidden', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>
                   <img
                     src={generatedImages[0].image_url}
                     alt="Generated concept image"
@@ -508,7 +513,7 @@ export default function ConceptDetailPage() {
               </Button>
 
               {videoUrl && (
-                <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: 360 }}>
+                <Box sx={{ borderRadius: '20px', overflow: 'hidden', maxWidth: 360 }}>
                   <video
                     src={videoUrl}
                     controls
@@ -535,7 +540,7 @@ export default function ConceptDetailPage() {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        PaperProps={{ sx: { bgcolor: '#1e1e1e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3 } }}
+        PaperProps={{ sx: { bgcolor: '#1e1e1e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px' } }}
       >
         <DialogTitle sx={{ fontWeight: 'bold' }}>Delete this concept?</DialogTitle>
         <DialogContent>

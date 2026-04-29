@@ -35,7 +35,12 @@ const darkTheme = createTheme({
     },
     MuiToggleButton: {
       styleOverrides: {
-        root: { lineHeight: 1, paddingTop: 7, paddingBottom: 7 }
+        root: { lineHeight: 1, paddingTop: 8, paddingBottom: 9 }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: { paddingBottom: '2px' }
       }
     },
     MuiButton: {
@@ -304,8 +309,8 @@ export default function DashboardHome() {
               sx={{
                 mb: 4,
                 '& .MuiToggleButton-root': {
-                  borderRadius: '16px !important',
-                  px: 2.5, py: 0.5,
+                  borderRadius: '10px !important',
+                  px: 2.5, paddingTop: '8px', paddingBottom: '9px',
                   border: '1px solid rgba(255,255,255,0.12)',
                   color: 'text.secondary',
                   textTransform: 'none',
