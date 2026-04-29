@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Button, Chip, Alert, CircularProgress,
   Divider, TextField, Card, CardMedia, Grid, IconButton, Tooltip,
-  CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions
+  CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions,
+  Select, MenuItem, FormControl, InputLabel, FormHelperText
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -73,6 +74,8 @@ export default function ConceptDetailPage() {
   const [imageGenLoading, setImageGenLoading] = useState(false);
   const [imageGenError, setImageGenError] = useState('');
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const [aspectRatio, setAspectRatio] = useState('1:1');
+  const [outputFormat, setOutputFormat] = useState('JPG');
 
   // Video gen
   const [videoGenLoading, setVideoGenLoading] = useState(false);
@@ -127,7 +130,11 @@ export default function ConceptDetailPage() {
     setImageGenLoading(true);
     setImageGenError('');
     try {
-      const res = await fetch(`/api/concepts/${id}/generate-image`, { method: 'POST' });
+      const res = await fetch(`/api/concepts/${id}/generate-image`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aspectRatio, outputFormat }),
+      });
       const text = await res.text();
       let data: any;
       try { data = JSON.parse(text); } catch {
@@ -395,18 +402,54 @@ export default function ConceptDetailPage() {
             {imageGenError && <Alert severity="error" sx={{ mb: 2 }}>{imageGenError}</Alert>}
 
             {generatedImages.length === 0 ? (
-              <Button
-                variant="contained"
-                onClick={handleGenerateImages}
-                disabled={imageGenLoading || concept?.status === 'rejected'}
-                startIcon={imageGenLoading
-                  ? <FontAwesomeIcon icon={faSpinner} spin />
-                  : <FontAwesomeIcon icon={faWandMagicSparkles} />
-                }
-                sx={{ borderRadius: 20, mb: 3 }}
-              >
-                {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap', mb: 3 }}>
+                <FormControl size="small" disabled={imageGenLoading}>
+                  <InputLabel>Aspect Ratio</InputLabel>
+                  <Select
+                    value={aspectRatio}
+                    label="Aspect Ratio"
+                    onChange={e => setAspectRatio(e.target.value)}
+                    sx={{ minWidth: 168, borderRadius: 2 }}
+                  >
+                    <MenuItem value="1:1">1:1 Square</MenuItem>
+                    <MenuItem value="9:16">9:16 Vertical</MenuItem>
+                    <MenuItem value="16:9">16:9 Horizontal</MenuItem>
+                    <MenuItem value="4:5">4:5 Portrait</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" disabled={imageGenLoading}>
+                  <InputLabel>Format</InputLabel>
+                  <Select
+                    value={outputFormat}
+                    label="Format"
+                    onChange={e => setOutputFormat(e.target.value)}
+                    sx={{ minWidth: 100, borderRadius: 2 }}
+                  >
+                    <MenuItem value="JPG">JPG</MenuItem>
+                    <MenuItem value="PNG">PNG</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <Chip
+                  label="🔒 1K Resolution"
+                  size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.05)', color: 'text.disabled', cursor: 'default' }}
+                />
+
+                <Button
+                  variant="contained"
+                  onClick={handleGenerateImages}
+                  disabled={imageGenLoading || concept?.status === 'rejected'}
+                  startIcon={imageGenLoading
+                    ? <FontAwesomeIcon icon={faSpinner} spin />
+                    : <FontAwesomeIcon icon={faWandMagicSparkles} />
+                  }
+                  sx={{ borderRadius: 20 }}
+                >
+                  {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
+                </Button>
+              </Box>
             ) : (
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ borderRadius: 3, overflow: 'hidden', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>

@@ -14,20 +14,31 @@ interface PDPRef { buffer: Buffer; mimeType: string; filename: string }
 
 const IMAGE_MODELS = ['gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'];
 
+const ASPECT_RATIO_LABELS: Record<string, string> = {
+  '1:1': 'square (1:1)',
+  '9:16': 'vertical portrait (9:16)',
+  '16:9': 'horizontal landscape (16:9)',
+  '4:5': 'portrait (4:5)',
+};
+
 async function generateAndUpload(
   supabase: ReturnType<typeof getSupabase>,
   prompt: string,
   conceptId: string,
-  pdp?: PDPRef
+  pdp?: PDPRef,
+  aspectRatio = '1:1',
+  outputFormat = 'JPG'
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+  const formatDirective = `Aspect ratio: ${ASPECT_RATIO_LABELS[aspectRatio] || aspectRatio}. Resolution: 1024px on the longest side. Output format: ${outputFormat}.`;
 
   const parts: any[] = [];
   if (pdp) {
     parts.push({ inlineData: { mimeType: pdp.mimeType, data: pdp.buffer.toString('base64') } });
-    parts.push({ text: `Using the product image above as the hero product (keep it recognizable), create a premium social media visual: ${prompt}` });
+    parts.push({ text: `Using the product image above as the hero product (keep it recognizable), create a premium social media visual: ${prompt} ${formatDirective}` });
   } else {
-    parts.push({ text: prompt });
+    parts.push({ text: `${prompt} ${formatDirective}` });
   }
 
   let imagePart: any = null;
@@ -61,8 +72,10 @@ async function generateAndUpload(
     throw new Error(`No image returned. Model attempts: ${modelErrors.join(' | ')}`);
   }
 
-  const { data: base64, mimeType } = imagePart.inlineData;
-  const ext = mimeType?.includes('png') ? 'png' : 'jpg';
+  const { data: base64, mimeType: returnedMime } = imagePart.inlineData;
+  const wantPng = outputFormat.toUpperCase() === 'PNG';
+  const ext = wantPng ? 'png' : 'jpg';
+  const mimeType = wantPng ? 'image/png' : 'image/jpeg';
   const fileName = `concepts/${conceptId}/${Date.now()}.${ext}`;
   const imageBuffer = Buffer.from(base64, 'base64');
 
@@ -89,6 +102,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
+
+    const body = await req.json().catch(() => ({}));
+    const aspectRatio: string = body.aspectRatio || '1:1';
+    const outputFormat: string = body.outputFormat || 'JPG';
 
     const supabase = getSupabase();
 
@@ -149,7 +166,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const prompt = concept.image_gen_prompt || `Premium product photography for social media: ${concept.copy}`;
-    const imageUrl = await generateAndUpload(supabase, prompt, params.id, pdpRef);
+    const imageUrl = await generateAndUpload(supabase, prompt, params.id, pdpRef, aspectRatio, outputFormat);
 
     await supabase.from('generated_images').insert({
       concept_id: params.id,
