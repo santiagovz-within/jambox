@@ -18,11 +18,11 @@ export async function POST(req: Request, { params }: { params: { brand_id: strin
   try {
     const { brand_name, description, rounds } = await req.json();
 
-    const allYesSamples = (rounds ?? []).flatMap((r: any) =>
-      r.samples.filter((s: any) => s.decision === 'yes').map((s: any) => s.text)
+    const allYesSamples: string[] = (rounds ?? []).flatMap((r: any) =>
+      r.samples.filter((s: any) => s.decision === 'yes').map((s: any) => s.text as string)
     );
-    const allNoReasons = (rounds ?? []).flatMap((r: any) =>
-      r.samples.filter((s: any) => s.decision === 'no' && s.reasoning).map((s: any) => s.reasoning)
+    const allNoReasons: string[] = (rounds ?? []).flatMap((r: any) =>
+      r.samples.filter((s: any) => s.decision === 'no' && s.reasoning).map((s: any) => s.reasoning as string)
     );
 
     // Synthesize a voice brief via Gemini
