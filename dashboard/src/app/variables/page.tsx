@@ -14,7 +14,7 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     background: { default: '#0f0f10', paper: '#1c1c1d' },
-    primary: { main: '#3B82F6' },
+    primary: { main: '#ffffff', light: 'rgba(255,255,255,0.8)', dark: 'rgba(255,255,255,0.9)', contrastText: '#111111' },
     secondary: { main: '#8b5cf6' },
   },
   shape: { borderRadius: 16 },
@@ -23,7 +23,23 @@ const darkTheme = createTheme({
     MuiCard: { styleOverrides: { root: { backgroundImage: 'none', border: '1px solid #363639' } } },
     MuiAccordion: { styleOverrides: { root: { backgroundImage: 'none', backgroundColor: '#1c1c1d', border: '1px solid #363639', borderRadius: '16px !important', overflow: 'hidden', '&:before': { display: 'none' } } } },
     MuiChip: { styleOverrides: { root: { paddingBottom: '2px' } } },
-    MuiButton: { styleOverrides: { root: { lineHeight: 1 }, sizeSmall: { paddingTop: 5, paddingBottom: 5 } } },
+    MuiButton: {
+      styleOverrides: {
+        root: { lineHeight: 1, paddingTop: 8, paddingBottom: 9, borderRadius: '10px' },
+        sizeSmall: { paddingTop: 5, paddingBottom: 5 },
+      }
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          fontSize: '0.875rem',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 0 },
+          '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.08)' },
+          '&.Mui-selected:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+        }
+      }
+    },
     MuiOutlinedInput: { styleOverrides: { root: { borderRadius: '10px' } } },
   }
 });
@@ -244,7 +260,7 @@ function VariablesPageInner() {
             <ArrowLeft size={20} />
           </IconButton>
           <Typography variant="h6" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Zap size={18} color="#3B82F6" /> JamBox
+            <Zap size={18} /> JamBox
           </Typography>
           <Typography variant="body2" color="text.secondary">/ Variables</Typography>
           <Box sx={{ ml: 'auto', display: 'flex', gap: 2 }}>
@@ -252,7 +268,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: '16px' }}
+              sx={{ borderRadius: '10px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -260,7 +276,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white' }}
             >
               Save
             </Button>
@@ -293,7 +309,7 @@ function VariablesPageInner() {
           <Accordion defaultExpanded sx={{ mb: 2 }}>
             <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Sliders size={16} color="#3B82F6" />
+                <Sliders size={16} />
                 <Typography fontWeight="bold">Creative Foundation</Typography>
               </Box>
             </AccordionSummary>
@@ -507,9 +523,9 @@ function VariablesPageInner() {
           <Accordion sx={{ mb: 4 }}>
             <AccordionSummary expandIcon={<ChevronDown size={16} />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                <TrendingUp size={16} color="#3B82F6" />
+                <TrendingUp size={16} />
                 <Typography fontWeight="bold">Trend Signals</Typography>
-                <Chip label="Auto-generated weekly" size="small" sx={{ bgcolor: 'rgba(59,130,246,0.15)', color: '#3B82F6', fontSize: '0.65rem', ml: 1 }} />
+                <Chip label="Auto-generated weekly" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', ml: 1 }} />
               </Box>
             </AccordionSummary>
             <AccordionDetails>
@@ -543,7 +559,7 @@ function VariablesPageInner() {
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                     {/* National column */}
                     <Box>
-                      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: '#3B82F6', letterSpacing: 0.5 }}>
+                      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>
                         <Globe size={12} /> National
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
@@ -699,7 +715,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: '16px', flex: 1 }}
+              sx={{ borderRadius: '10px', flex: 1 }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -707,11 +723,11 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white' }}
             >
               Save
             </Button>
-            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: '16px' }}>
+            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: '10px' }}>
               Back
             </Button>
           </Box>

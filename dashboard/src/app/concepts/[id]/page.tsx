@@ -15,7 +15,7 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     background: { default: '#0f0f10', paper: '#1c1c1d' },
-    primary: { main: '#3B82F6' },
+    primary: { main: '#ffffff', light: 'rgba(255,255,255,0.8)', dark: 'rgba(255,255,255,0.9)', contrastText: '#111111' },
     secondary: { main: '#8b5cf6' },
   },
   shape: { borderRadius: 16 },
@@ -37,8 +37,22 @@ const darkTheme = createTheme({
       styleOverrides: { root: { paddingBottom: '2px' } }
     },
     MuiButton: {
-      styleOverrides: { root: { lineHeight: 1 }, sizeSmall: { paddingTop: 5, paddingBottom: 5 } }
-    }
+      styleOverrides: {
+        root: { lineHeight: 1, paddingTop: 8, paddingBottom: 9, borderRadius: '10px' },
+        sizeSmall: { paddingTop: 5, paddingBottom: 5 },
+      }
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          fontSize: '0.875rem',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 0 },
+          '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.08)' },
+          '&.Mui-selected:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+        }
+      }
+    },
   }
 });
 
@@ -234,7 +248,7 @@ export default function ConceptDetailPage() {
             <ArrowLeft size={20} />
           </IconButton>
           <Typography variant="h6" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Zap size={18} color="#3B82F6" /> JamBox
+            <Zap size={18} /> JamBox
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
             / Concept Detail
@@ -267,36 +281,38 @@ export default function ConceptDetailPage() {
           {/* Action buttons */}
           <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', alignItems: 'center' }}>
             <Button
+              variant="contained"
+              disableElevation
               startIcon={<Check size={16} />}
               onClick={() => handleAction('approve')}
               disabled={!!actionLoading || !isPending}
               sx={{
-                borderRadius: '16px',
-                bgcolor: concept?.status === 'approved' ? 'rgba(34,197,94,0.22)' : 'rgba(34,197,94,0.12)',
-                color: concept?.status === 'rejected' ? 'rgba(34,197,94,0.25)' : '#22c55e',
-                '&:hover': { bgcolor: 'rgba(34,197,94,0.2)' },
-                '&:active': { bgcolor: 'rgba(34,197,94,0.3)' },
+                backgroundColor: concept?.status === 'approved' ? '#3a3a3c' : concept?.status === 'rejected' ? '#222224' : 'rgba(34,197,94,0.12)',
+                color: concept?.status === 'approved' ? 'rgba(255,255,255,0.75)' : concept?.status === 'rejected' ? 'rgba(255,255,255,0.2)' : '#22c55e',
+                boxShadow: 'none',
+                '&:hover': { backgroundColor: concept?.status === 'pending' ? 'rgba(34,197,94,0.22)' : 'rgba(255,255,255,0.1)', boxShadow: 'none' },
                 '&.Mui-disabled': {
-                  bgcolor: concept?.status === 'approved' ? 'rgba(34,197,94,0.22)' : 'rgba(34,197,94,0.05)',
-                  color: concept?.status === 'approved' ? '#22c55e' : 'rgba(34,197,94,0.2)',
+                  backgroundColor: concept?.status === 'approved' ? '#3a3a3c' : '#222224',
+                  color: concept?.status === 'approved' ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.2)',
                 },
               }}
             >
               {actionLoading === 'approve' ? 'Approving…' : 'YES — Approve'}
             </Button>
             <Button
+              variant="contained"
+              disableElevation
               startIcon={<X size={16} />}
               onClick={() => handleAction('reject')}
               disabled={!!actionLoading || !isPending}
               sx={{
-                borderRadius: '16px',
-                bgcolor: concept?.status === 'rejected' ? 'rgba(234,179,8,0.22)' : 'rgba(234,179,8,0.12)',
-                color: concept?.status === 'approved' ? 'rgba(234,179,8,0.25)' : '#eab308',
-                '&:hover': { bgcolor: 'rgba(234,179,8,0.2)' },
-                '&:active': { bgcolor: 'rgba(234,179,8,0.3)' },
+                backgroundColor: concept?.status === 'rejected' ? '#3a3a3c' : concept?.status === 'approved' ? '#222224' : 'rgba(239,68,68,0.12)',
+                color: concept?.status === 'rejected' ? 'rgba(255,255,255,0.75)' : concept?.status === 'approved' ? 'rgba(255,255,255,0.2)' : '#ef4444',
+                boxShadow: 'none',
+                '&:hover': { backgroundColor: concept?.status === 'pending' ? 'rgba(239,68,68,0.22)' : 'rgba(255,255,255,0.1)', boxShadow: 'none' },
                 '&.Mui-disabled': {
-                  bgcolor: concept?.status === 'rejected' ? 'rgba(234,179,8,0.22)' : 'rgba(234,179,8,0.05)',
-                  color: concept?.status === 'rejected' ? '#eab308' : 'rgba(234,179,8,0.2)',
+                  backgroundColor: concept?.status === 'rejected' ? '#3a3a3c' : '#222224',
+                  color: concept?.status === 'rejected' ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.2)',
                 },
               }}
             >
@@ -307,7 +323,7 @@ export default function ConceptDetailPage() {
               startIcon={<Edit2 size={16} />}
               onClick={() => setEditMode(!editMode)}
               disabled={!!actionLoading}
-              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white' }}
             >
               Edit & Approve
             </Button>
@@ -319,7 +335,7 @@ export default function ConceptDetailPage() {
               color="error"
               startIcon={<Trash2 size={16} />}
               onClick={() => setDeleteDialogOpen(true)}
-              sx={{ borderRadius: '16px', borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
+              sx={{ borderRadius: '10px', borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
             >
               Delete concept
             </Button>
@@ -344,11 +360,11 @@ export default function ConceptDetailPage() {
                   color="success"
                   onClick={() => handleAction('edit')}
                   disabled={!!actionLoading}
-                  sx={{ borderRadius: '16px' }}
+                  sx={{ borderRadius: '10px' }}
                 >
                   {actionLoading === 'edit' ? 'Saving…' : 'Confirm Approval with Edits'}
                 </Button>
-                <Button onClick={() => setEditMode(false)} sx={{ borderRadius: '16px', color: 'text.secondary' }}>
+                <Button onClick={() => setEditMode(false)} sx={{ borderRadius: '10px', color: 'text.secondary' }}>
                   Cancel
                 </Button>
               </Box>
@@ -404,8 +420,8 @@ export default function ConceptDetailPage() {
                 )}
               </Box>
 
-              <Box sx={{ mb: 4, p: 2.5, bgcolor: 'rgba(59, 130, 246, 0.05)', borderRadius: '20px', border: '1px solid rgba(59,130,246,0.15)' }}>
-                <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ mb: 4, p: 2.5, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: '20px', border: '1px solid #363639' }}>
+                <Typography variant="overline" sx={{ letterSpacing: 2, fontWeight: 700, color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <BarChart2 size={16} /> SPROUT AI DATA BACKING NOTES
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7 }}>
@@ -420,7 +436,7 @@ export default function ConceptDetailPage() {
           {/* Image Generation Section */}
           <Box sx={{ mb: 6 }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ImageIcon size={18} color="#3B82F6" /> Image Generation
+              <ImageIcon size={18} /> Image Generation
             </Typography>
 
             {/* Suggested prompt */}
@@ -483,7 +499,7 @@ export default function ConceptDetailPage() {
                   onClick={handleGenerateImages}
                   disabled={imageGenLoading || concept?.status === 'rejected'}
                   startIcon={imageGenLoading ? <CircularProgress size={16} /> : <Zap size={16} />}
-                  sx={{ borderRadius: '16px', whiteSpace: 'nowrap' }}
+                  sx={{ borderRadius: '10px', whiteSpace: 'nowrap' }}
                 >
                   {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
                 </Button>
@@ -523,7 +539,7 @@ export default function ConceptDetailPage() {
                 onClick={handleGenerateVideo}
                 disabled={videoGenLoading || !selectedImageForVideo}
                 startIcon={videoGenLoading ? <CircularProgress size={16} /> : <Video size={16} />}
-                sx={{ borderRadius: '16px', borderColor: '#8b5cf6', color: '#8b5cf6', mb: 3 }}
+                sx={{ borderRadius: '10px', borderColor: '#8b5cf6', color: '#8b5cf6', mb: 3 }}
               >
                 {videoGenLoading ? 'Generating video… (~2 min)' : 'Generate video from selected image'}
               </Button>
@@ -565,7 +581,7 @@ export default function ConceptDetailPage() {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ borderRadius: '16px', color: 'text.secondary' }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ borderRadius: '10px', color: 'text.secondary' }}>
             Cancel
           </Button>
           <Button
@@ -573,7 +589,7 @@ export default function ConceptDetailPage() {
             color="error"
             onClick={handleDelete}
             disabled={deleteLoading}
-            sx={{ borderRadius: '16px' }}
+            sx={{ borderRadius: '10px' }}
           >
             {deleteLoading ? 'Deleting…' : 'Yes, delete it'}
           </Button>

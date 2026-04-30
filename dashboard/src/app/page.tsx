@@ -15,7 +15,7 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     background: { default: '#0f0f10', paper: '#1c1c1d' },
-    primary: { main: '#3B82F6' },
+    primary: { main: '#ffffff', light: 'rgba(255,255,255,0.8)', dark: 'rgba(255,255,255,0.9)', contrastText: '#111111' },
     secondary: { main: '#8b5cf6' },
   },
   shape: { borderRadius: 20 },
@@ -45,8 +45,19 @@ const darkTheme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: { lineHeight: 1 },
+        root: { lineHeight: 1, paddingTop: 8, paddingBottom: 9, borderRadius: '10px' },
         sizeSmall: { paddingTop: 5, paddingBottom: 5 },
+      }
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          fontSize: '0.875rem',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 0 },
+          '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.08)' },
+          '&.Mui-selected:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+        }
       }
     },
     MuiAppBar: {
@@ -73,7 +84,7 @@ const darkTheme = createTheme({
         paper: {
           backgroundColor: '#1c1c1d',
           border: '1px solid #363639',
-          borderRadius: 12,
+          borderRadius: '10px',
           marginTop: 8,
         }
       }
@@ -235,7 +246,7 @@ export default function DashboardHome() {
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar sx={{ pt: 1, pb: 1 }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Zap size={18} color="#3B82F6" /> JamBox
+              <Zap size={18} /> JamBox
             </Typography>
             <Box sx={{ display: 'flex', gap: 1.5 }}>
 
@@ -251,7 +262,7 @@ export default function DashboardHome() {
               <Menu anchorEl={brandAnchor} open={Boolean(brandAnchor)} onClose={() => setBrandAnchor(null)}>
                 {brands.map(b => (
                   <MenuItem key={b.brand_id} selected={b.brand_id === activeBrand}
-                    onClick={() => { setActiveBrand(b.brand_id); setBrandAnchor(null); }} sx={{ borderRadius: 1 }}>
+                    onClick={() => { setActiveBrand(b.brand_id); setBrandAnchor(null); }}>
                     {b.brand_name}
                   </MenuItem>
                 ))}
@@ -270,7 +281,7 @@ export default function DashboardHome() {
               <Menu anchorEl={monthAnchor} open={Boolean(monthAnchor)} onClose={() => setMonthAnchor(null)}>
                 {recentMonths.map(m => (
                   <MenuItem key={m.value} selected={m.value === activeMonth}
-                    onClick={() => { setActiveMonth(m.value); setMonthAnchor(null); }} sx={{ borderRadius: 1 }}>
+                    onClick={() => { setActiveMonth(m.value); setMonthAnchor(null); }}>
                     {m.label}
                   </MenuItem>
                 ))}
@@ -399,7 +410,7 @@ export default function DashboardHome() {
                             </Box>
                             <Chip label={concept.status} size="small" color={statusColor(concept.status)} />
                           </Box>
-                          <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, fontSize: '1.1rem', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             "{concept.copy}"
                           </Typography>
                           {concept.rationale && (
@@ -419,15 +430,13 @@ export default function DashboardHome() {
                               onClick={() => handleAction(concept.id, 'approve')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
                               sx={{
-                                borderRadius: '10px', minWidth: 0, px: 1.5,
-                                backgroundColor: concept.status === 'Approved' ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.12)',
-                                color: concept.status === 'Rejected' ? 'rgba(34,197,94,0.3)' : '#22c55e',
-                                boxShadow: 'none',
-                                '&:hover': { backgroundColor: 'rgba(34,197,94,0.22)', boxShadow: 'none' },
-                                '&:active': { backgroundColor: 'rgba(34,197,94,0.38)', boxShadow: 'none' },
+                                minWidth: 0, px: 1.5, boxShadow: 'none',
+                                backgroundColor: concept.status === 'Approved' ? '#3a3a3c' : concept.status === 'Rejected' ? '#222224' : 'rgba(34,197,94,0.12)',
+                                color: concept.status === 'Approved' ? 'rgba(255,255,255,0.75)' : concept.status === 'Rejected' ? 'rgba(255,255,255,0.2)' : '#22c55e',
+                                '&:hover': { backgroundColor: concept.status === 'Pending' ? 'rgba(34,197,94,0.22)' : 'rgba(255,255,255,0.1)', boxShadow: 'none' },
                                 '&.Mui-disabled': {
-                                  backgroundColor: concept.status === 'Approved' ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.06)',
-                                  color: concept.status === 'Approved' ? '#22c55e' : 'rgba(34,197,94,0.3)',
+                                  backgroundColor: concept.status === 'Approved' ? '#3a3a3c' : '#222224',
+                                  color: concept.status === 'Approved' ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.2)',
                                 },
                               }}
                             >
@@ -442,15 +451,13 @@ export default function DashboardHome() {
                               onClick={() => handleAction(concept.id, 'reject')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
                               sx={{
-                                borderRadius: '10px', minWidth: 0, px: 1.5,
-                                backgroundColor: concept.status === 'Rejected' ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.12)',
-                                color: concept.status === 'Approved' ? 'rgba(239,68,68,0.3)' : '#ef4444',
-                                boxShadow: 'none',
-                                '&:hover': { backgroundColor: 'rgba(239,68,68,0.22)', boxShadow: 'none' },
-                                '&:active': { backgroundColor: 'rgba(239,68,68,0.38)', boxShadow: 'none' },
+                                minWidth: 0, px: 1.5, boxShadow: 'none',
+                                backgroundColor: concept.status === 'Rejected' ? '#3a3a3c' : concept.status === 'Approved' ? '#222224' : 'rgba(239,68,68,0.12)',
+                                color: concept.status === 'Rejected' ? 'rgba(255,255,255,0.75)' : concept.status === 'Approved' ? 'rgba(255,255,255,0.2)' : '#ef4444',
+                                '&:hover': { backgroundColor: concept.status === 'Pending' ? 'rgba(239,68,68,0.22)' : 'rgba(255,255,255,0.1)', boxShadow: 'none' },
                                 '&.Mui-disabled': {
-                                  backgroundColor: concept.status === 'Rejected' ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.06)',
-                                  color: concept.status === 'Rejected' ? '#ef4444' : 'rgba(239,68,68,0.3)',
+                                  backgroundColor: concept.status === 'Rejected' ? '#3a3a3c' : '#222224',
+                                  color: concept.status === 'Rejected' ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.2)',
                                 },
                               }}
                             >

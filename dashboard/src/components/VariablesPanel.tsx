@@ -88,7 +88,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Sliders size={18} color="#3B82F6" /> Variables
+        <Sliders size={18} /> Variables
         <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto', fontWeight: 400 }}>
           {activeBrandId}
         </Typography>
@@ -147,7 +147,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
             fullWidth
             endIcon={<ExternalLink size={14} />}
             onClick={() => { onClose(); router.push('/variables'); }}
-            sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white', justifyContent: 'space-between', px: 2.5 }}
+            sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', justifyContent: 'space-between', px: 2.5 }}
           >
             See All Variables
           </Button>
@@ -165,7 +165,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
               onClick={() => handleSave(true)}
               disabled={saving || generating}
               fullWidth
-              sx={{ borderRadius: '16px' }}
+              sx={{ borderRadius: '10px', paddingTop: '8px', paddingBottom: '9px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -175,7 +175,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
               onClick={() => handleSave(false)}
               disabled={saving || generating}
               fullWidth
-              sx={{ borderRadius: '16px' }}
+              sx={{ borderRadius: '10px', paddingTop: '8px', paddingBottom: '9px' }}
             >
               Save for Tomorrow
             </Button>
