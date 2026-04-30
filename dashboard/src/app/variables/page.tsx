@@ -268,7 +268,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: '10px' }}
+              sx={{ borderRadius: '10px', paddingTop: '11px', paddingBottom: '12px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -276,7 +276,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white' }}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', paddingTop: '11px', paddingBottom: '12px' }}
             >
               Save
             </Button>
@@ -715,7 +715,7 @@ function VariablesPageInner() {
               variant="contained"
               onClick={() => handleSave(true)}
               disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: '10px', flex: 1 }}
+              sx={{ borderRadius: '10px', flex: 1, paddingTop: '11px', paddingBottom: '12px' }}
             >
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
@@ -723,7 +723,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white' }}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', paddingTop: '11px', paddingBottom: '12px' }}
             >
               Save
             </Button>
