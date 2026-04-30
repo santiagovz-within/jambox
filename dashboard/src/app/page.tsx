@@ -14,7 +14,7 @@ import VariablesPanel from '../components/VariablesPanel';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    background: { default: '#0A0A0A', paper: '#141414' },
+    background: { default: '#0f0f10', paper: '#1c1c1d' },
     primary: { main: '#3B82F6' },
     secondary: { main: '#8b5cf6' },
   },
@@ -29,7 +29,7 @@ const darkTheme = createTheme({
         root: {
           backgroundImage: 'none',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
+          border: '1px solid #363639',
         }
       }
     },
@@ -53,9 +53,9 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: '#0A0A0A',
+          backgroundColor: '#0f0f10',
           boxShadow: 'none',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid #363639',
         }
       }
     },
@@ -63,16 +63,16 @@ const darkTheme = createTheme({
       styleOverrides: {
         paper: {
           backgroundImage: 'none',
-          backgroundColor: '#141414',
-          borderLeft: '1px solid rgba(255, 255, 255, 0.05)',
+          backgroundColor: '#1c1c1d',
+          borderLeft: '1px solid #363639',
         }
       }
     },
     MuiMenu: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#1e1e1e',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: '#1c1c1d',
+          border: '1px solid #363639',
           borderRadius: 12,
           marginTop: 8,
         }
@@ -99,10 +99,6 @@ function getRecentMonths() {
 function currentMonth() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function todayLabel() {
-  return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function formatDayHeader(dateStr: string): string {
@@ -225,7 +221,7 @@ export default function DashboardHome() {
   };
 
   const pageTitle = isCurrentMonth
-    ? `Today's Concepts — ${todayLabel()}`
+    ? "Today's Concepts"
     : `${activeMonthLabel} Concepts`;
 
   const filteredConcepts = statusFilter === 'all'
@@ -247,7 +243,7 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={(e) => setBrandAnchor(e.currentTarget)}
-                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', px: 2, paddingTop: '8px', paddingBottom: '9px' }}
               >
                 Brand: {activeBrandName}
                 <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
@@ -266,7 +262,7 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={(e) => setMonthAnchor(e.currentTarget)}
-                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', px: 2, paddingTop: '8px', paddingBottom: '9px' }}
               >
                 {activeMonthLabel}
                 <ChevronDown size={14} style={{ marginLeft: 8, opacity: 0.7 }} />
@@ -284,9 +280,9 @@ export default function DashboardHome() {
               <Button
                 variant="outlined"
                 onClick={() => setDrawerOpen(!drawerOpen)}
-                sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', px: 2, py: 0.5 }}
+                sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', px: 2, paddingTop: '8px', paddingBottom: '9px' }}
               >
-                <Sliders size={16} color="#3B82F6" style={{ marginRight: 8 }} /> Variables
+                <Sliders size={16} style={{ marginRight: 8 }} /> Variables
               </Button>
             </Box>
           </Toolbar>
@@ -311,13 +307,14 @@ export default function DashboardHome() {
                 '& .MuiToggleButton-root': {
                   borderRadius: '10px !important',
                   px: 2.5, paddingTop: '8px', paddingBottom: '9px',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'text.secondary',
+                  border: '1px solid #363639',
+                  color: 'rgba(255,255,255,0.6)',
                   textTransform: 'none',
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   mx: 0.5,
-                  '&.Mui-selected': { color: 'white', bgcolor: 'rgba(59,130,246,0.2)', borderColor: '#3B82F6' },
+                  '&.Mui-selected': { color: 'white', bgcolor: '#2f2f30', borderColor: '#363639' },
+                  '&.Mui-selected:hover': { bgcolor: '#3a3a3b' },
                   '&:first-of-type': { ml: 0 },
                 },
               }}
@@ -371,7 +368,7 @@ export default function DashboardHome() {
                 <Box>
                   {groupByDate(filteredConcepts).map(({ date, items }) => (
                     <Box key={date} sx={{ mb: 6 }}>
-                      <Typography variant="overline" sx={{ color: 'text.disabled', letterSpacing: 1.5, fontWeight: 700, display: 'block', mb: 2, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 1 }}>
+                      <Typography variant="overline" sx={{ color: 'text.disabled', letterSpacing: 1.5, fontWeight: 700, display: 'block', mb: 2, borderBottom: '1px solid #363639', pb: 1 }}>
                         {formatDayHeader(date)}
                       </Typography>
                       <Grid container spacing={4}>
@@ -417,11 +414,22 @@ export default function DashboardHome() {
                             {/* YES */}
                             <Button
                               size="small"
-                              variant={concept.status === 'Approved' ? 'contained' : 'outlined'}
-                              color="success"
+                              variant="contained"
+                              disableElevation
                               onClick={() => handleAction(concept.id, 'approve')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
-                              sx={{ borderRadius: '10px', minWidth: 0, px: 1.5 }}
+                              sx={{
+                                borderRadius: '10px', minWidth: 0, px: 1.5,
+                                backgroundColor: concept.status === 'Approved' ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.12)',
+                                color: concept.status === 'Rejected' ? 'rgba(34,197,94,0.3)' : '#22c55e',
+                                boxShadow: 'none',
+                                '&:hover': { backgroundColor: 'rgba(34,197,94,0.22)', boxShadow: 'none' },
+                                '&:active': { backgroundColor: 'rgba(34,197,94,0.38)', boxShadow: 'none' },
+                                '&.Mui-disabled': {
+                                  backgroundColor: concept.status === 'Approved' ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.06)',
+                                  color: concept.status === 'Approved' ? '#22c55e' : 'rgba(34,197,94,0.3)',
+                                },
+                              }}
                             >
                               <Check size={14} style={{ marginRight: 4 }} /> YES
                             </Button>
@@ -429,11 +437,22 @@ export default function DashboardHome() {
                             {/* NO */}
                             <Button
                               size="small"
-                              variant={concept.status === 'Rejected' ? 'contained' : 'outlined'}
-                              color="error"
+                              variant="contained"
+                              disableElevation
                               onClick={() => handleAction(concept.id, 'reject')}
                               disabled={!!actionStates[concept.id] || concept.status !== 'Pending'}
-                              sx={{ borderRadius: '10px', minWidth: 0, px: 1.5 }}
+                              sx={{
+                                borderRadius: '10px', minWidth: 0, px: 1.5,
+                                backgroundColor: concept.status === 'Rejected' ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.12)',
+                                color: concept.status === 'Approved' ? 'rgba(239,68,68,0.3)' : '#ef4444',
+                                boxShadow: 'none',
+                                '&:hover': { backgroundColor: 'rgba(239,68,68,0.22)', boxShadow: 'none' },
+                                '&:active': { backgroundColor: 'rgba(239,68,68,0.38)', boxShadow: 'none' },
+                                '&.Mui-disabled': {
+                                  backgroundColor: concept.status === 'Rejected' ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.06)',
+                                  color: concept.status === 'Rejected' ? '#ef4444' : 'rgba(239,68,68,0.3)',
+                                },
+                              }}
                             >
                               <X size={14} style={{ marginRight: 4 }} /> NO
                             </Button>
@@ -443,7 +462,7 @@ export default function DashboardHome() {
                               <IconButton
                                 size="small"
                                 onClick={() => router.push(`/concepts/${concept.id}`)}
-                                sx={{ border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px' }}
+                                sx={{ border: '1px solid #363639', borderRadius: '10px' }}
                               >
                                 <Edit size={14} />
                               </IconButton>

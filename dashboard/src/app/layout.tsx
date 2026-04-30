@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={manrope.className} style={{ margin: 0, backgroundColor: '#0A0A0A', color: '#fff', display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+      <body className={manrope.className} style={{ margin: 0, backgroundColor: '#0f0f10', color: '#fff', display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
         {children}
       </body>
     </html>

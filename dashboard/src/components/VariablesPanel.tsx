@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio,
-  TextField, Button, Chip, Divider, Slider, Alert, CircularProgress
+  Typography, Box, FormLabel, RadioGroup, FormControlLabel, Radio,
+  Button, Divider, Slider, Alert, CircularProgress
 } from '@mui/material';
 import { Sliders, ExternalLink } from 'react-feather';
 import { useRouter } from 'next/navigation';
@@ -147,7 +147,7 @@ export default function VariablesPanel({ onClose, activeBrandId = "fuzzys_taco_s
             fullWidth
             endIcon={<ExternalLink size={14} />}
             onClick={() => { onClose(); router.push('/variables'); }}
-            sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.15)', color: 'white', justifyContent: 'space-between', px: 2.5 }}
+            sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white', justifyContent: 'space-between', px: 2.5 }}
           >
             See All Variables
           </Button>

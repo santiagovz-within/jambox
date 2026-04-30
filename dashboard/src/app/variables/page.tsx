@@ -13,17 +13,18 @@ import { Suspense } from 'react';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    background: { default: '#0A0A0A', paper: '#141414' },
+    background: { default: '#0f0f10', paper: '#1c1c1d' },
     primary: { main: '#3B82F6' },
     secondary: { main: '#8b5cf6' },
   },
   shape: { borderRadius: 16 },
   typography: { fontFamily: 'inherit', button: { textTransform: 'none', fontWeight: 600 } },
   components: {
-    MuiCard: { styleOverrides: { root: { backgroundImage: 'none', border: '1px solid rgba(255,255,255,0.05)' } } },
-    MuiAccordion: { styleOverrides: { root: { backgroundImage: 'none', backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.05)', '&:before': { display: 'none' } } } },
+    MuiCard: { styleOverrides: { root: { backgroundImage: 'none', border: '1px solid #363639' } } },
+    MuiAccordion: { styleOverrides: { root: { backgroundImage: 'none', backgroundColor: '#1c1c1d', border: '1px solid #363639', borderRadius: '16px !important', overflow: 'hidden', '&:before': { display: 'none' } } } },
     MuiChip: { styleOverrides: { root: { paddingBottom: '2px' } } },
     MuiButton: { styleOverrides: { root: { lineHeight: 1 }, sizeSmall: { paddingTop: 5, paddingBottom: 5 } } },
+    MuiOutlinedInput: { styleOverrides: { root: { borderRadius: '10px' } } },
   }
 });
 
@@ -238,7 +239,7 @@ function VariablesPageInner() {
         <CssBaseline />
 
         {/* Header */}
-        <Box sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 10, bgcolor: '#0A0A0A' }}>
+        <Box sx={{ borderBottom: '1px solid #363639', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 10, bgcolor: '#0f0f10' }}>
           <IconButton onClick={() => router.push('/')} sx={{ color: 'white' }}>
             <ArrowLeft size={20} />
           </IconButton>
@@ -259,7 +260,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
             >
               Save
             </Button>
@@ -472,7 +473,7 @@ function VariablesPageInner() {
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}>
                   {temporalContext.map((entry: any, i) => (
-                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 1.5, bgcolor: entry.custom ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${entry.custom ? 'rgba(139,92,246,0.2)' : 'transparent'}` }}>
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 1.5, bgcolor: entry.custom ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: '10px', border: `1px solid ${entry.custom ? 'rgba(139,92,246,0.2)' : 'transparent'}` }}>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" fontWeight={entry.custom || entry.source === 'culture_calendar' ? 600 : 400}>
                           {entry.label}
@@ -524,7 +525,7 @@ function VariablesPageInner() {
                 const national = trendSignals.filter((s: any) => !s.scope || s.scope === 'national');
                 const local = trendSignals.filter((s: any) => s.scope === 'local');
                 const renderSignal = (signal: any, i: number, originalIdx: number) => (
-                  <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.5, bgcolor: signal.custom ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 2, border: `1px solid ${signal.custom ? 'rgba(59,130,246,0.2)' : 'transparent'}` }}>
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.5, bgcolor: signal.custom ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: '10px', border: `1px solid ${signal.custom ? 'rgba(59,130,246,0.2)' : 'transparent'}` }}>
                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: signalColor[signal.strength] || '#94a3b8', flexShrink: 0, mt: 0.7 }} />
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="body2" sx={{ lineHeight: 1.4 }}>{signal.signal}</Typography>
@@ -693,7 +694,7 @@ function VariablesPageInner() {
           </Accordion>
 
           {/* Save actions at bottom */}
-          <Box sx={{ display: 'flex', gap: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <Box sx={{ display: 'flex', gap: 2, pt: 2, borderTop: '1px solid #363639' }}>
             <Button
               variant="contained"
               onClick={() => handleSave(true)}
@@ -706,7 +707,7 @@ function VariablesPageInner() {
               variant="outlined"
               onClick={() => handleSave(false)}
               disabled={saving || generating}
-              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
             >
               Save
             </Button>
@@ -723,7 +724,7 @@ function VariablesPageInner() {
 export default function VariablesPage() {
   return (
     <Suspense fallback={
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#0A0A0A' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#0f0f10' }}>
         <CircularProgress />
       </Box>
     }>

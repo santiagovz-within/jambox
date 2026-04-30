@@ -14,7 +14,7 @@ import { useRouter, useParams } from 'next/navigation';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    background: { default: '#0A0A0A', paper: '#141414' },
+    background: { default: '#0f0f10', paper: '#1c1c1d' },
     primary: { main: '#3B82F6' },
     secondary: { main: '#8b5cf6' },
   },
@@ -29,7 +29,7 @@ const darkTheme = createTheme({
         root: {
           backgroundImage: 'none',
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          border: '1px solid rgba(255,255,255,0.05)',
+          border: '1px solid #363639',
         }
       }
     },
@@ -229,7 +229,7 @@ export default function ConceptDetailPage() {
         <CssBaseline />
 
         {/* Header */}
-        <Box sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ borderBottom: '1px solid #363639', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
           <IconButton onClick={() => router.push('/')} sx={{ color: 'white' }}>
             <ArrowLeft size={20} />
           </IconButton>
@@ -267,22 +267,38 @@ export default function ConceptDetailPage() {
           {/* Action buttons */}
           <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', alignItems: 'center' }}>
             <Button
-              variant="contained"
-              color="success"
               startIcon={<Check size={16} />}
               onClick={() => handleAction('approve')}
               disabled={!!actionLoading || !isPending}
-              sx={{ borderRadius: '16px' }}
+              sx={{
+                borderRadius: '16px',
+                bgcolor: concept?.status === 'approved' ? 'rgba(34,197,94,0.22)' : 'rgba(34,197,94,0.12)',
+                color: concept?.status === 'rejected' ? 'rgba(34,197,94,0.25)' : '#22c55e',
+                '&:hover': { bgcolor: 'rgba(34,197,94,0.2)' },
+                '&:active': { bgcolor: 'rgba(34,197,94,0.3)' },
+                '&.Mui-disabled': {
+                  bgcolor: concept?.status === 'approved' ? 'rgba(34,197,94,0.22)' : 'rgba(34,197,94,0.05)',
+                  color: concept?.status === 'approved' ? '#22c55e' : 'rgba(34,197,94,0.2)',
+                },
+              }}
             >
               {actionLoading === 'approve' ? 'Approving…' : 'YES — Approve'}
             </Button>
             <Button
-              variant="contained"
-              color="error"
               startIcon={<X size={16} />}
               onClick={() => handleAction('reject')}
               disabled={!!actionLoading || !isPending}
-              sx={{ borderRadius: '16px' }}
+              sx={{
+                borderRadius: '16px',
+                bgcolor: concept?.status === 'rejected' ? 'rgba(234,179,8,0.22)' : 'rgba(234,179,8,0.12)',
+                color: concept?.status === 'approved' ? 'rgba(234,179,8,0.25)' : '#eab308',
+                '&:hover': { bgcolor: 'rgba(234,179,8,0.2)' },
+                '&:active': { bgcolor: 'rgba(234,179,8,0.3)' },
+                '&.Mui-disabled': {
+                  bgcolor: concept?.status === 'rejected' ? 'rgba(234,179,8,0.22)' : 'rgba(234,179,8,0.05)',
+                  color: concept?.status === 'rejected' ? '#eab308' : 'rgba(234,179,8,0.2)',
+                },
+              }}
             >
               {actionLoading === 'reject' ? 'Declining…' : 'NO — Decline'}
             </Button>
@@ -291,7 +307,7 @@ export default function ConceptDetailPage() {
               startIcon={<Edit2 size={16} />}
               onClick={() => setEditMode(!editMode)}
               disabled={!!actionLoading}
-              sx={{ borderRadius: '16px', borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+              sx={{ borderRadius: '16px', borderColor: '#363639', color: 'white' }}
             >
               Edit & Approve
             </Button>
@@ -311,7 +327,7 @@ export default function ConceptDetailPage() {
 
           {/* Edit mode */}
           {editMode && (
-            <Box sx={{ mb: 4, p: 3, bgcolor: '#1e1e1e', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <Box sx={{ mb: 4, p: 3, bgcolor: '#1c1c1d', borderRadius: '20px', border: '1px solid #363639' }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Edit Copy</Typography>
               <TextField
                 multiline
@@ -355,7 +371,7 @@ export default function ConceptDetailPage() {
                     </IconButton>
                   </Tooltip>
                 </Box>
-                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1a1a1a', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.7, fontSize: '1.05rem', fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ mt: 1, p: 2.5, bgcolor: '#1c1c1d', borderRadius: '20px', border: '1px solid #363639', lineHeight: 1.7, fontSize: '1.05rem', fontWeight: 600 }}>
                   {concept?.edited_copy || concept?.copy}
                 </Typography>
                 {concept?.edited_copy && concept.edited_copy !== concept.copy && (
@@ -408,7 +424,7 @@ export default function ConceptDetailPage() {
             </Typography>
 
             {/* Suggested prompt */}
-            <Box sx={{ mb: 3, p: 2, bgcolor: '#1a1a1a', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <Box sx={{ mb: 3, p: 2, bgcolor: '#1c1c1d', borderRadius: '20px', border: '1px solid #363639' }}>
               <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.5 }}>
                 AI image prompt
               </Typography>
@@ -474,7 +490,7 @@ export default function ConceptDetailPage() {
               </Box>
             ) : (
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ borderRadius: '20px', overflow: 'hidden', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Box sx={{ borderRadius: '20px', overflow: 'hidden', maxWidth: 480, border: '1px solid #363639' }}>
                   <img
                     src={generatedImages[0].image_url}
                     alt="Generated concept image"
@@ -540,7 +556,7 @@ export default function ConceptDetailPage() {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        PaperProps={{ sx: { bgcolor: '#1e1e1e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px' } }}
+        PaperProps={{ sx: { bgcolor: '#1c1c1d', border: '1px solid #363639', borderRadius: '20px' } }}
       >
         <DialogTitle sx={{ fontWeight: 'bold' }}>Delete this concept?</DialogTitle>
         <DialogContent>
