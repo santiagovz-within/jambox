@@ -372,6 +372,47 @@ function VariablesPageInner() {
             </Alert>
           )}
 
+          {/* Section: Voice Builder */}
+          <Accordion sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Mic size={16} />
+                <Typography fontWeight="bold">Voice Builder</Typography>
+                {isVoiceLocked
+                  ? <Chip label="Locked" size="small" sx={{ bgcolor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontSize: '0.65rem' }} />
+                  : <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Iterative voice tuning</Typography>
+                }
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {isVoiceLocked
+                  ? 'A synthesized voice brief is being injected into every concept generation for this brand.'
+                  : "Describe this brand's voice, generate sample captions, vote YES/NO, and iterate until it feels right. Lock the voice to inject it into all generations."
+                }
+              </Typography>
+              {isVoiceLocked && activeBrand?.brand_identity_doc && (
+                <Typography variant="body2" sx={{ p: 2, bgcolor: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: '10px', fontStyle: 'italic', color: 'rgba(255,255,255,0.7)', mb: 2, lineHeight: 1.7 }}>
+                  {activeBrand.brand_identity_doc}
+                </Typography>
+              )}
+              <Button
+                variant="outlined"
+                onClick={() => router.push(`/brands/${activeBrandId}/voice`)}
+                endIcon={<Mic size={14} />}
+                sx={{
+                  borderRadius: '10px',
+                  borderColor: isVoiceLocked ? 'rgba(34,197,94,0.4)' : '#363639',
+                  color: isVoiceLocked ? '#22c55e' : 'white',
+                  paddingTop: '11px',
+                  paddingBottom: '12px',
+                }}
+              >
+                {isVoiceLocked ? 'Edit Voice Builder' : 'Open Voice Builder'}
+              </Button>
+            </AccordionDetails>
+          </Accordion>
+
           {/* Section: Creative Foundation */}
           <Accordion defaultExpanded sx={{ mb: 2 }}>
             <AccordionSummary expandIcon={<ChevronDown size={16} />}>
@@ -521,47 +562,6 @@ function VariablesPageInner() {
                   <Plus size={16} />
                 </Button>
               </Box>
-            </AccordionDetails>
-          </Accordion>
-
-          {/* Section: Voice Builder */}
-          <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Mic size={16} />
-                <Typography fontWeight="bold">Voice Builder</Typography>
-                {isVoiceLocked
-                  ? <Chip label="Locked" size="small" sx={{ bgcolor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontSize: '0.65rem' }} />
-                  : <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Iterative voice tuning</Typography>
-                }
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {isVoiceLocked
-                  ? 'A synthesized voice brief is being injected into every concept generation for this brand.'
-                  : 'Describe this brand\'s voice, generate sample captions, vote YES/NO, and iterate until it feels right. Lock the voice to inject it into all generations.'
-                }
-              </Typography>
-              {isVoiceLocked && activeBrand?.brand_identity_doc && (
-                <Typography variant="body2" sx={{ p: 2, bgcolor: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: '10px', fontStyle: 'italic', color: 'rgba(255,255,255,0.7)', mb: 2, lineHeight: 1.7 }}>
-                  {activeBrand.brand_identity_doc}
-                </Typography>
-              )}
-              <Button
-                variant="outlined"
-                onClick={() => router.push(`/brands/${activeBrandId}/voice`)}
-                endIcon={<Mic size={14} />}
-                sx={{
-                  borderRadius: '10px',
-                  borderColor: isVoiceLocked ? 'rgba(34,197,94,0.4)' : '#363639',
-                  color: isVoiceLocked ? '#22c55e' : 'white',
-                  paddingTop: '11px',
-                  paddingBottom: '12px',
-                }}
-              >
-                {isVoiceLocked ? 'Edit Voice Builder' : 'Open Voice Builder'}
-              </Button>
             </AccordionDetails>
           </Accordion>
 
