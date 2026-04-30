@@ -345,7 +345,7 @@ export default function VoiceBuilderPage() {
               multiline
               minRows={4}
               fullWidth
-              placeholder='e.g. "You\'re a young person speaking casually to a peer. You don\'t over-explain. You use humor but never try too hard. You sound like a real person, not a brand."'
+              placeholder={`e.g. "You're a young person speaking casually to a peer. You don't over-explain. You use humor but never try too hard. You sound like a real person, not a brand."`}
               value={description}
               onChange={e => setDescription(e.target.value)}
               disabled={isLocked}
