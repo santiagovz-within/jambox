@@ -297,7 +297,7 @@ export default function DashboardHome() {
                 onClick={() => setDrawerOpen(!drawerOpen)}
                 sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', px: 2, paddingTop: '8px', paddingBottom: '9px' }}
               >
-                <Sliders size={16} style={{ marginRight: 8 }} /> Variables
+                <Sliders size={16} style={{ marginRight: 8 }} /> Brands & Variables
               </Button>
             </Box>
           </Toolbar>
@@ -337,7 +337,7 @@ export default function DashboardHome() {
               <ToggleButton value="all">All</ToggleButton>
               <ToggleButton value="Pending">Pending</ToggleButton>
               <ToggleButton value="Approved">Approved</ToggleButton>
-              <ToggleButton value="Rejected">Declined</ToggleButton>
+              <ToggleButton value="Rejected">Rejected</ToggleButton>
             </ToggleButtonGroup>
 
             {availableCategories.length > 0 && (

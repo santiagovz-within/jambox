@@ -294,7 +294,7 @@ function VariablesPageInner() {
           <Typography variant="h6" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Zap size={18} /> JamBox
           </Typography>
-          <Typography variant="body2" color="text.secondary">/ Variables</Typography>
+          <Typography variant="body2" color="text.secondary">/ Brands & Variables</Typography>
           <Box sx={{ ml: 'auto', display: 'flex', gap: 2 }}>
             <Button
               variant="contained"
