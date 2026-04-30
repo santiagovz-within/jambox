@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { WebClient } from '@slack/web-api';
 import { fetchSproutData } from '@/lib/sprout';
+import { DEFAULT_CATEGORIES } from '@/lib/categories';
 
 export const maxDuration = 60;
 
@@ -72,11 +73,22 @@ export async function POST(req: Request) {
       const temporalCtx = (vars.temporal_context || []).map((t: any) => `- ${t.label}${t.date ? ` (${t.date})` : ''}`).join('\n') || 'None configured.';
       const trendSignals = (vars.trend_signals || []).map((t: any) => `- [${(t.strength || 'medium').toUpperCase()}] ${t.signal} (${t.source})`).join('\n') || 'None configured.';
 
+      const customCategories: { id: string; label: string }[] = vars.custom_categories || [];
+      const allCategories = [
+        ...DEFAULT_CATEGORIES,
+        ...customCategories.map(c => ({ ...c, description: `Custom brand category: ${c.label}` })),
+      ];
+      const categoryList = allCategories.map(c => `- ${c.id}: ${c.description}`).join('\n');
+
+      const voiceBrief = brand.voice_profile?.locked && brand.brand_identity_doc
+        ? `\nBRAND VOICE BRIEF (locked — follow exactly):\n${brand.brand_identity_doc}\n`
+        : '';
+
       const prompt = `
 You are a senior social media creative strategist for ${brand.brand_name}.
 
 ${buildDateContext()}
-
+${voiceBrief}
 BRAND CREATIVE DIRECTION:
 - Tone: ${vars.tone || 'engaging'}
 - Topics to push: ${(vars.push_topics || []).join(', ')}
@@ -106,10 +118,14 @@ Generate exactly 3 social media content concepts. The mix MUST include:
 2. One TikTok video (platform: "tiktok", content_type: "tiktok_video")
 3. One Instagram Carousel or Image (platform: "instagram", content_type: "carousel" or "static")
 
+POST CATEGORIES — assign one category to each concept from this list. Pick whichever fits best and ensure variety across the 3 concepts:
+${categoryList}
+
 Return a JSON array with this exact structure:
 [{
   "platform": "instagram",
   "content_type": "reel",
+  "category": "food_porn",
   "copy": "caption text",
   "visual_direction": "detailed visual description",
   "image_gen_prompt": "optimized AI image generation prompt",
@@ -176,6 +192,14 @@ Only return the JSON array, no other text.`;
         }
 
         const conceptId = saved?.id || 'unknown';
+
+        // Save category (requires migration 005_concept_category.sql)
+        if (conceptId !== 'unknown' && concept.category) {
+          await supabase.from('concepts')
+            .update({ category: concept.category })
+            .eq('id', conceptId)
+            .then(({ error: e }) => { if (e) console.warn(`[Generate] category not saved — run migration 005: ${e.message}`); });
+        }
 
         // Save new fields separately (requires migration 001_add_concept_fields.sql)
         if (conceptId !== 'unknown' && concept.sprout_data_notes) {

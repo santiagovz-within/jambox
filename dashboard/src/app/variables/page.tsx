@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Container, Typography, Button, TextField, Chip, Slider, Alert, CircularProgress,
-  IconButton, CssBaseline, FormLabel, Accordion, AccordionSummary, AccordionDetails
+  IconButton, CssBaseline, FormLabel, Accordion, AccordionSummary, AccordionDetails,
+  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link, Globe } from 'react-feather';
+import { ArrowLeft, Zap, Plus, X, RefreshCw, Calendar, TrendingUp, Sliders, MapPin, ChevronDown, Coffee, Link, Globe, Edit2, Mic, Trash2 } from 'react-feather';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import BrandModal from '@/components/BrandModal';
+import { DEFAULT_CATEGORIES } from '@/lib/categories';
 
 const darkTheme = createTheme({
   palette: {
@@ -41,6 +44,7 @@ const darkTheme = createTheme({
       }
     },
     MuiOutlinedInput: { styleOverrides: { root: { borderRadius: '10px' } } },
+    MuiDialog: { styleOverrides: { paper: { backgroundImage: 'none' } } },
   }
 });
 
@@ -56,6 +60,13 @@ function VariablesPageInner() {
   const [generating, setGenerating] = useState(false);
   const [contextLoading, setContextLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+
+  // Brand modal state
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingBrandId, setDeletingBrandId] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Core variables
   const [tone, setTone] = useState('witty');
@@ -75,6 +86,10 @@ function VariablesPageInner() {
   const [locations, setLocations] = useState<string[]>([]);
   const [locationInput, setLocationInput] = useState('');
 
+  // Custom categories
+  const [customCategories, setCustomCategories] = useState<{ id: string; label: string }[]>([]);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
+
   // Temporal context
   const [temporalContext, setTemporalContext] = useState<any[]>([]);
   const [customTemporalInput, setCustomTemporalInput] = useState('');
@@ -89,11 +104,10 @@ function VariablesPageInner() {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [menuItemInput, setMenuItemInput] = useState('');
 
-  // Brand resource links (saved to config, not creative_variables)
+  // Brand resource links
   const [cultureCalendarUrl, setCultureCalendarUrl] = useState('');
   const [pdpFolderUrl, setPdpFolderUrl] = useState('');
 
-  // Load brand data
   const loadBrand = useCallback(async (brandId: string) => {
     setLoading(true);
     try {
@@ -116,6 +130,7 @@ function VariablesPageInner() {
           setPublicTopics(v.public_topic_alignment || []);
           setLocations(v.locations || []);
           setMenuItems(v.menu_items || []);
+          setCustomCategories(v.custom_categories || []);
         }
         if (brand?.config) {
           setCultureCalendarUrl(brand.config.culture_calendar_url || '');
@@ -135,9 +150,7 @@ function VariablesPageInner() {
     }
   }, []);
 
-  useEffect(() => {
-    loadBrand(activeBrandId);
-  }, [activeBrandId, loadBrand]);
+  useEffect(() => { loadBrand(activeBrandId); }, [activeBrandId, loadBrand]);
 
   const handleSave = async (runNow = false) => {
     setSaving(true);
@@ -149,22 +162,13 @@ function VariablesPageInner() {
         body: JSON.stringify({
           brand_id: activeBrandId,
           creative_variables: {
-            tone,
-            creativity,
-            trend_weight: trendWeight,
-            push_topics: pushTopics,
-            avoid_topics: avoidTopics,
-            visual_style: visualStyle,
-            public_topic_alignment: publicTopics,
-            locations,
-            temporal_context: temporalContext,
-            trend_signals: trendSignals,
-            menu_items: menuItems,
+            tone, creativity, trend_weight: trendWeight,
+            push_topics: pushTopics, avoid_topics: avoidTopics,
+            visual_style: visualStyle, public_topic_alignment: publicTopics,
+            locations, temporal_context: temporalContext, trend_signals: trendSignals,
+            menu_items: menuItems, custom_categories: customCategories,
           },
-          config: {
-            culture_calendar_url: cultureCalendarUrl,
-            pdp_folder_url: pdpFolderUrl,
-          },
+          config: { culture_calendar_url: cultureCalendarUrl, pdp_folder_url: pdpFolderUrl },
         })
       });
       const data = await res.json();
@@ -237,6 +241,32 @@ function VariablesPageInner() {
     setInput('');
   };
 
+  const addCustomCategory = () => {
+    if (!customCategoryInput.trim()) return;
+    const id = customCategoryInput.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_');
+    if (customCategories.find(c => c.id === id)) return;
+    setCustomCategories([...customCategories, { id, label: customCategoryInput.trim() }]);
+    setCustomCategoryInput('');
+  };
+
+  const handleDeleteBrand = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/brands/${deletingBrandId}`, { method: 'DELETE' });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Delete failed'); }
+      const remaining = brands.filter(b => b.brand_id !== deletingBrandId);
+      setBrands(remaining);
+      if (activeBrandId === deletingBrandId && remaining.length > 0) {
+        setActiveBrandId(remaining[0].brand_id);
+      }
+      setDeleteDialogOpen(false);
+    } catch (e: any) {
+      setStatusMsg(`❌ ${e.message}`);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <ThemeProvider theme={darkTheme}>
@@ -248,6 +278,8 @@ function VariablesPageInner() {
   }
 
   const signalColor: Record<string, string> = { high: '#22c55e', medium: '#f59e0b', low: '#94a3b8' };
+  const activeBrand = brands.find(b => b.brand_id === activeBrandId);
+  const isVoiceLocked = activeBrand?.voice_profile?.locked === true;
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -285,18 +317,75 @@ function VariablesPageInner() {
 
         <Container maxWidth="md" sx={{ pt: 4 }}>
 
-          {/* Brand selector */}
-          <Box sx={{ display: 'flex', gap: 1.5, mb: 4, flexWrap: 'wrap' }}>
-            {brands.map(b => (
+          {/* Brand selector with management */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, fontSize: '0.7rem' }}>
+              Brand
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+              {brands.map(b => (
+                <Box key={b.brand_id} sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <Chip
+                    label={b.brand_name}
+                    onClick={() => setActiveBrandId(b.brand_id)}
+                    color={b.brand_id === activeBrandId ? 'primary' : 'default'}
+                    variant={b.brand_id === activeBrandId ? 'filled' : 'outlined'}
+                    sx={{ cursor: 'pointer', pr: b.brand_id === activeBrandId ? 1 : undefined }}
+                  />
+                  {b.brand_id === activeBrandId && (
+                    <Box sx={{ display: 'flex', gap: 0.25, ml: 0.5 }}>
+                      <Tooltip title="Edit brand">
+                        <IconButton
+                          size="small"
+                          onClick={() => { setEditingBrand(b); setBrandModalOpen(true); }}
+                          sx={{ color: 'rgba(255,255,255,0.5)', p: 0.5, '&:hover': { color: 'white' } }}
+                        >
+                          <Edit2 size={12} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete brand">
+                        <IconButton
+                          size="small"
+                          onClick={() => { setDeletingBrandId(b.brand_id); setDeleteDialogOpen(true); }}
+                          sx={{ color: 'rgba(255,255,255,0.3)', p: 0.5, '&:hover': { color: '#ef4444' } }}
+                        >
+                          <Trash2 size={12} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </Box>
+              ))}
               <Chip
-                key={b.brand_id}
-                label={b.brand_name}
-                onClick={() => setActiveBrandId(b.brand_id)}
-                color={b.brand_id === activeBrandId ? 'primary' : 'default'}
-                variant={b.brand_id === activeBrandId ? 'filled' : 'outlined'}
-                sx={{ cursor: 'pointer' }}
+                label="+ New Brand"
+                onClick={() => { setEditingBrand(null); setBrandModalOpen(true); }}
+                variant="outlined"
+                sx={{ cursor: 'pointer', borderStyle: 'dashed', color: 'rgba(255,255,255,0.5)', borderColor: 'rgba(255,255,255,0.2)', '&:hover': { borderColor: 'rgba(255,255,255,0.5)', color: 'white' } }}
               />
-            ))}
+            </Box>
+
+            {/* Voice Builder link */}
+            <Box sx={{ mt: 2 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Mic size={14} />}
+                onClick={() => router.push(`/brands/${activeBrandId}/voice`)}
+                sx={{
+                  borderRadius: '10px',
+                  borderColor: isVoiceLocked ? '#22c55e' : '#363639',
+                  color: isVoiceLocked ? '#22c55e' : 'rgba(255,255,255,0.6)',
+                  fontSize: '0.8rem',
+                }}
+              >
+                {isVoiceLocked ? '🔒 Voice Locked' : 'Voice Builder →'}
+              </Button>
+              {isVoiceLocked && (
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 1.5 }}>
+                  Voice brief is injected into all generations for this brand
+                </Typography>
+              )}
+            </Box>
           </Box>
 
           {statusMsg && (
@@ -392,6 +481,67 @@ function VariablesPageInner() {
                     </Button>
                   </Box>
                 </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Section: Post Categories */}
+          <Accordion sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ChevronDown size={16} />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <TrendingUp size={16} />
+                <Typography fontWeight="bold">Post Categories</Typography>
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 1 }}>Drive concept variety</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Default categories are always active. Add custom ones specific to this brand — they'll be used by the AI to vary daily concept types.
+              </Typography>
+
+              <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
+                Default categories
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+                {DEFAULT_CATEGORIES.map(cat => (
+                  <Chip
+                    key={cat.id}
+                    label={cat.label}
+                    size="small"
+                    sx={{ bgcolor: `${cat.color}18`, border: `1px solid ${cat.color}44`, color: cat.color, cursor: 'default' }}
+                  />
+                ))}
+              </Box>
+
+              <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
+                Custom categories for this brand
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
+                {customCategories.map(cat => (
+                  <Chip
+                    key={cat.id}
+                    label={cat.label}
+                    onDelete={() => setCustomCategories(customCategories.filter(c => c.id !== cat.id))}
+                    size="small"
+                    sx={{ bgcolor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)' }}
+                  />
+                ))}
+                {customCategories.length === 0 && (
+                  <Typography variant="caption" color="text.disabled">No custom categories yet.</Typography>
+                )}
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  size="small"
+                  placeholder="e.g. Brand collab, Limited drop, Store event"
+                  value={customCategoryInput}
+                  onChange={e => setCustomCategoryInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addCustomCategory()}
+                  sx={{ flexGrow: 1 }}
+                />
+                <Button onClick={addCustomCategory} variant="outlined" size="small" sx={{ borderRadius: 10 }}>
+                  <Plus size={16} />
+                </Button>
               </Box>
             </AccordionDetails>
           </Accordion>
@@ -557,7 +707,6 @@ function VariablesPageInner() {
                 );
                 return (
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
-                    {/* National column */}
                     <Box>
                       <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>
                         <Globe size={12} /> National
@@ -577,15 +726,13 @@ function VariablesPageInner() {
                         </Button>
                       </Box>
                     </Box>
-
-                    {/* Local column */}
                     <Box>
                       <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 700, color: '#22c55e', letterSpacing: 0.5 }}>
                         <MapPin size={12} /> Local{locations.length > 0 ? ` — ${locations.slice(0, 2).join(', ')}${locations.length > 2 ? '…' : ''}` : ''}
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
                         {local.length === 0
-                          ? <Typography variant="caption" color="text.disabled">{locations.length === 0 ? 'Add locations in the Locations section above, then Regenerate.' : 'No local signals yet — click Regenerate.'}</Typography>
+                          ? <Typography variant="caption" color="text.disabled">{locations.length === 0 ? 'Add locations above, then Regenerate.' : 'No local signals yet — click Regenerate.'}</Typography>
                           : local.map((s: any, i: number) => renderSignal(s, i, trendSignals.indexOf(s)))}
                       </Box>
                       <Box sx={{ display: 'flex', gap: 1 }}>
@@ -606,7 +753,7 @@ function VariablesPageInner() {
                 <Alert severity="warning" sx={{ mt: 2 }} icon={false}>
                   <Typography variant="body2" fontWeight={600}>Sprout Social not connected</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Trend data is mock. Add <code>SPROUT_API_TOKEN</code> and <code>SPROUT_PROFILE_ID_{activeBrandId.toUpperCase().replace(/-/g, '_')}</code> to your Vercel environment variables to enable live audience trends.
+                    Trend data is mock. Add <code>SPROUT_API_TOKEN</code> and <code>SPROUT_PROFILE_ID_{activeBrandId.toUpperCase().replace(/-/g, '_')}</code> to enable live audience trends.
                   </Typography>
                 </Alert>
               )}
@@ -624,36 +771,22 @@ function VariablesPageInner() {
             </AccordionSummary>
             <AccordionDetails>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Add the products or menu items this brand sells. Concepts will be generated around these items, and the image generator will match the copy to the right PDP from your Drive folder.
+                Add the products or menu items this brand sells. Concepts will be generated around these items.
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                 {menuItems.map(item => (
-                  <Chip
-                    key={item}
-                    label={item}
-                    onDelete={() => setMenuItems(menuItems.filter(x => x !== item))}
-                    size="small"
-                    sx={{ bgcolor: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316' }}
-                  />
+                  <Chip key={item} label={item} onDelete={() => setMenuItems(menuItems.filter(x => x !== item))} size="small"
+                    sx={{ bgcolor: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316' }} />
                 ))}
-                {menuItems.length === 0 && (
-                  <Typography variant="caption" color="text.disabled">No products added yet.</Typography>
-                )}
+                {menuItems.length === 0 && <Typography variant="caption" color="text.disabled">No products added yet.</Typography>}
               </Box>
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  size="small"
-                  placeholder="e.g. Honey Chipotle Shrimp Taco, Old Skool Black"
-                  value={menuItemInput}
-                  onChange={e => setMenuItemInput(e.target.value)}
+                <TextField size="small" placeholder="e.g. Honey Chipotle Shrimp Taco, Old Skool Black"
+                  value={menuItemInput} onChange={e => setMenuItemInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
-                  sx={{ flexGrow: 1 }}
-                />
-                <Button
-                  onClick={() => addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
-                  variant="outlined" size="small"
-                  sx={{ borderRadius: 10, borderColor: '#f97316', color: '#f97316' }}
-                >
+                  sx={{ flexGrow: 1 }} />
+                <Button onClick={() => addChip(menuItems, setMenuItems, menuItemInput, setMenuItemInput)}
+                  variant="outlined" size="small" sx={{ borderRadius: 10, borderColor: '#f97316', color: '#f97316' }}>
                   <Plus size={16} />
                 </Button>
               </Box>
@@ -672,38 +805,22 @@ function VariablesPageInner() {
             <AccordionDetails>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <Box>
-                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
-                    Culture Calendar — Google Sheets URL
-                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>Culture Calendar — Google Sheets URL</Typography>
                   <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>
-                    The sheet is read on every "Regenerate" — entries appear in Temporal / Calendar Context above.
-                    Expected columns: Date | Event/Label | Relevance | Type
+                    Read on every "Regenerate". Expected columns: Date | Event/Label | Relevance | Type
                   </Typography>
-                  <TextField
-                    fullWidth size="small"
-                    placeholder="https://docs.google.com/spreadsheets/d/…"
-                    value={cultureCalendarUrl}
-                    onChange={e => setCultureCalendarUrl(e.target.value)}
-                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }}
-                  />
+                  <TextField fullWidth size="small" placeholder="https://docs.google.com/spreadsheets/d/…"
+                    value={cultureCalendarUrl} onChange={e => setCultureCalendarUrl(e.target.value)}
+                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
-                    PDP Images — Google Drive Folder URL
-                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>PDP Images — Google Drive Folder URL</Typography>
                   <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>
-                    Folder containing product images. Files must follow the naming convention:{' '}
-                    <code style={{ color: '#f97316' }}>{'{brand}_{category}_{product-name}.{ext}'}</code>
-                    <br />
-                    e.g. <code style={{ color: '#94a3b8' }}>fuzzys_taco_honey-chipotle-shrimp.jpg</code>
+                    Naming convention: <code style={{ color: '#f97316' }}>{'{brand}_{category}_{product-name}.{ext}'}</code>
                   </Typography>
-                  <TextField
-                    fullWidth size="small"
-                    placeholder="https://drive.google.com/drive/folders/…"
-                    value={pdpFolderUrl}
-                    onChange={e => setPdpFolderUrl(e.target.value)}
-                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }}
-                  />
+                  <TextField fullWidth size="small" placeholder="https://drive.google.com/drive/folders/…"
+                    value={pdpFolderUrl} onChange={e => setPdpFolderUrl(e.target.value)}
+                    InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.8rem' } }} />
                 </Box>
               </Box>
             </AccordionDetails>
@@ -711,28 +828,59 @@ function VariablesPageInner() {
 
           {/* Save actions at bottom */}
           <Box sx={{ display: 'flex', gap: 2, pt: 2, borderTop: '1px solid #363639' }}>
-            <Button
-              variant="contained"
-              onClick={() => handleSave(true)}
-              disabled={saving || generating || contextLoading}
-              sx={{ borderRadius: '10px', flex: 1, paddingTop: '11px', paddingBottom: '12px' }}
-            >
+            <Button variant="contained" onClick={() => handleSave(true)} disabled={saving || generating || contextLoading}
+              sx={{ borderRadius: '10px', flex: 1, paddingTop: '11px', paddingBottom: '12px' }}>
               {generating ? 'Generating…' : 'Save & Generate Now'}
             </Button>
-            <Button
-              variant="outlined"
-              onClick={() => handleSave(false)}
-              disabled={saving || generating}
-              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', paddingTop: '11px', paddingBottom: '12px' }}
-            >
+            <Button variant="outlined" onClick={() => handleSave(false)} disabled={saving || generating}
+              sx={{ borderRadius: '10px', borderColor: '#363639', color: 'white', paddingTop: '11px', paddingBottom: '12px' }}>
               Save
             </Button>
-            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: '10px' }}>
-              Back
-            </Button>
+            <Button onClick={() => router.push('/')} color="inherit" sx={{ borderRadius: '10px' }}>Back</Button>
           </Box>
         </Container>
       </Box>
+
+      {/* Brand create/edit modal */}
+      <BrandModal
+        open={brandModalOpen}
+        brand={editingBrand}
+        onClose={() => setBrandModalOpen(false)}
+        onSaved={(saved) => {
+          setBrandModalOpen(false);
+          if (editingBrand) {
+            setBrands(prev => prev.map(b => b.brand_id === saved.brand_id ? saved : b));
+          } else {
+            setBrands(prev => [...prev, saved]);
+            setActiveBrandId(saved.brand_id);
+          }
+        }}
+      />
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{ sx: { bgcolor: '#1c1c1d', border: '1px solid #363639', borderRadius: '16px' } }}
+      >
+        <DialogTitle>Delete brand?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This will hide <strong>{brands.find(b => b.brand_id === deletingBrandId)?.brand_name}</strong> from the dashboard. Existing concepts are preserved. This can be reversed from the database if needed.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="inherit" sx={{ borderRadius: '10px' }}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleDeleteBrand}
+            disabled={deleteLoading}
+            sx={{ borderRadius: '10px', bgcolor: '#ef4444', '&:hover': { bgcolor: '#dc2626' }, color: 'white' }}
+          >
+            {deleteLoading ? <CircularProgress size={16} color="inherit" /> : 'Delete Brand'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

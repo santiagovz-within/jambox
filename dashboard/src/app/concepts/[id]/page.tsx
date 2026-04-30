@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ArrowLeft, Check, X, Edit2, Image as ImageIcon, Video, Zap, BarChart2, Trash2, Copy, FileText, Eye, Star, Lock } from 'react-feather';
+import { getCategoryLabel } from '@/lib/categories';
 import { useRouter, useParams } from 'next/navigation';
 
 const darkTheme = createTheme({
@@ -270,10 +271,19 @@ export default function ConceptDetailPage() {
                 {concept?.brand_id && ` · ${concept.brand_id}`}
               </Typography>
             </Box>
-            <Chip
-              label={concept?.status ? concept.status.charAt(0).toUpperCase() + concept.status.slice(1) : 'Pending'}
-              color={statusColor(concept?.status || 'pending')}
-            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {concept?.category && (
+                <Chip
+                  label={getCategoryLabel(concept.category)}
+                  size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.15)', fontSize: '0.75rem' }}
+                />
+              )}
+              <Chip
+                label={concept?.status ? concept.status.charAt(0).toUpperCase() + concept.status.slice(1) : 'Pending'}
+                color={statusColor(concept?.status || 'pending')}
+              />
+            </Box>
           </Box>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -499,7 +509,7 @@ export default function ConceptDetailPage() {
                   onClick={handleGenerateImages}
                   disabled={imageGenLoading || concept?.status === 'rejected'}
                   startIcon={imageGenLoading ? <CircularProgress size={16} /> : <Zap size={16} />}
-                  sx={{ borderRadius: '10px', whiteSpace: 'nowrap' }}
+                  sx={{ borderRadius: '10px', whiteSpace: 'nowrap', paddingTop: '11px', paddingBottom: '12px' }}
                 >
                   {imageGenLoading ? 'Generating image… (~30s)' : 'Generate with this prompt'}
                 </Button>

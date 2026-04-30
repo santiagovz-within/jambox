@@ -7,6 +7,7 @@ import {
   Menu, MenuItem, Button, Alert, IconButton, Tooltip, ToggleButtonGroup, ToggleButton
 } from '@mui/material';
 import { ChevronDown, Sliders, Zap, Check, X, Edit, ExternalLink } from 'react-feather';
+import { getCategoryLabel } from '../lib/categories';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import VariablesPanel from '../components/VariablesPanel';
@@ -156,6 +157,7 @@ export default function DashboardHome() {
   const [brandAnchor, setBrandAnchor] = useState<null | HTMLElement>(null);
   const [monthAnchor, setMonthAnchor] = useState<null | HTMLElement>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'Pending' | 'Approved' | 'Rejected'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   const recentMonths = getRecentMonths();
   const activeBrandName = brands.find(b => b.brand_id === activeBrand)?.brand_name || activeBrand;
@@ -190,6 +192,7 @@ export default function DashboardHome() {
             sprout_data_notes: c.sprout_data_notes || '',
             confidence_score: c.confidence_score,
             images: c.generated_images?.map((img: any) => img.image_url).filter(Boolean) || [],
+            category: c.category || '',
           })));
         } else {
           setConcepts([]);
@@ -235,9 +238,10 @@ export default function DashboardHome() {
     ? "Today's Concepts"
     : `${activeMonthLabel} Concepts`;
 
-  const filteredConcepts = statusFilter === 'all'
-    ? concepts
-    : concepts.filter(c => c.status === statusFilter);
+  const statusFiltered = statusFilter === 'all' ? concepts : concepts.filter(c => c.status === statusFilter);
+  const filteredConcepts = categoryFilter === 'all' ? statusFiltered : statusFiltered.filter(c => c.category === categoryFilter);
+
+  const availableCategories = Array.from(new Set(concepts.map(c => c.category).filter(Boolean))) as string[];
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -336,6 +340,39 @@ export default function DashboardHome() {
               <ToggleButton value="Rejected">Declined</ToggleButton>
             </ToggleButtonGroup>
 
+            {availableCategories.length > 0 && (
+              <ToggleButtonGroup
+                value={categoryFilter}
+                exclusive
+                onChange={(_, v) => { if (v !== null) setCategoryFilter(v); }}
+                size="small"
+                sx={{
+                  mb: 4, display: 'flex', flexWrap: 'wrap', gap: 0,
+                  '& .MuiToggleButton-root': {
+                    borderRadius: '10px !important',
+                    px: 2, paddingTop: '6px', paddingBottom: '7px',
+                    border: '1px solid #363639',
+                    color: 'rgba(255,255,255,0.5)',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                    mx: 0.5,
+                    mb: 0.75,
+                    '&.Mui-selected': { color: 'white', bgcolor: '#2f2f30', borderColor: '#363639' },
+                    '&.Mui-selected:hover': { bgcolor: '#3a3a3b' },
+                    '&:first-of-type': { ml: 0 },
+                  },
+                }}
+              >
+                <ToggleButton value="all">All categories</ToggleButton>
+                {availableCategories.map(cat => (
+                  <ToggleButton key={cat} value={cat}>
+                    {getCategoryLabel(cat)}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            )}
+
             {fetchError && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 Failed to load concepts: {fetchError}
@@ -398,7 +435,7 @@ export default function DashboardHome() {
                         )}
                         <CardContent sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => router.push(`/concepts/${concept.id}`)}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                               <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
                                 {concept.platform}
                               </Typography>
@@ -406,6 +443,13 @@ export default function DashboardHome() {
                                 <Typography variant="caption" color="text.disabled" sx={{ textTransform: 'capitalize' }}>
                                   · {concept.content_type.replace('_', ' ')}
                                 </Typography>
+                              )}
+                              {concept.category && (
+                                <Chip
+                                  label={getCategoryLabel(concept.category)}
+                                  size="small"
+                                  sx={{ fontSize: '0.65rem', height: 18, bgcolor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}
+                                />
                               )}
                             </Box>
                             <Chip label={concept.status} size="small" color={statusColor(concept.status)} />

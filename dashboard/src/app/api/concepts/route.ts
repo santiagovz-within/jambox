@@ -17,15 +17,15 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const brand_id = searchParams.get('brand_id');
   const month = searchParams.get('month'); // expects 'YYYY-MM'
+  const category = searchParams.get('category');
 
   let query = supabase
     .from('concepts')
     .select('*, generated_images(image_url, variation_label)')
     .order('created_at', { ascending: false });
 
-  if (brand_id) {
-    query = query.eq('brand_id', brand_id);
-  }
+  if (brand_id) query = query.eq('brand_id', brand_id);
+  if (category) query = query.eq('category', category);
 
   if (month) {
     const [year, mon] = month.split('-').map(Number);

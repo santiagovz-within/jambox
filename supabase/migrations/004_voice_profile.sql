@@ -1,0 +1,1 @@
+ALTER TABLE brands ADD COLUMN IF NOT EXISTS voice_profile JSONB DEFAULT '{}';
