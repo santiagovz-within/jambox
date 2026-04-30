@@ -344,7 +344,7 @@ export default function DashboardHome() {
 
             {loading ? (
               <Fade in={loading} timeout={500}>
-                <Grid container spacing={4}>
+                <Grid container spacing={2}>
                   {[1, 2, 3].map((item) => (
                     <Grid item xs={12} md={4} key={item}>
                       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 0 }}>
@@ -382,7 +382,7 @@ export default function DashboardHome() {
                       <Typography variant="overline" sx={{ color: 'text.disabled', letterSpacing: 1.5, fontWeight: 700, display: 'block', mb: 2, borderBottom: '1px solid #363639', pb: 1 }}>
                         {formatDayHeader(date)}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2} sx={{ pt: 1 }}>
                   {items.map((concept) => (
                     <Grid item xs={12} md={4} key={concept.id}>
                       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
